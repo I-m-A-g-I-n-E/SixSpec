@@ -4,3 +4,7 @@
 *.egg-info
 .pytest_cache
 .coverage
+.DS_Store
+sixspec/__pycache__/__init__.cpython-311.pyc
+sixspec/core/__pycache__/__init__.cpython-311.pyc
+sixspec/core/__pycache__/models.cpython-311.pyc
