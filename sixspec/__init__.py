@@ -10,6 +10,8 @@ Core concepts:
 - Dimension: The six dimensions (WHO/WHAT/WHEN/WHERE/HOW/WHY)
 - DiltsLevel: Hierarchical levels from Environment to Mission
 - BaseActor: Interface for entities that understand dimensions
+- DiltsWalker: Hierarchical walker with WHAT→WHY propagation
+- Workspace: Isolated execution environment for walkers
 """
 
 from sixspec.core.models import (
@@ -20,6 +22,13 @@ from sixspec.core.models import (
     SpecW5H1,
     BaseActor,
 )
+from sixspec.walkers import (
+    DiltsWalker,
+    ValidationResult,
+    Workspace,
+    MissionWalker,
+    CapabilityWalker,
+)
 
 __all__ = [
     "Dimension",
@@ -28,4 +37,9 @@ __all__ = [
     "CommitW5H1",
     "SpecW5H1",
     "BaseActor",
+    "DiltsWalker",
+    "ValidationResult",
+    "Workspace",
+    "MissionWalker",
+    "CapabilityWalker",
 ]
