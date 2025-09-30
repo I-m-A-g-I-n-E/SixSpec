@@ -7,6 +7,8 @@ This module contains the fundamental building blocks:
 - W5H1 dataclass for six-dimensional specifications
 - Specialized W5H1 subclasses (CommitW5H1, SpecW5H1)
 - BaseActor abstract class for dimensional awareness
+- SpecificationHypergraph for auto-organization
+- HierarchyNode for hierarchical structure representation
 """
 
 from sixspec.core.models import (
@@ -17,6 +19,10 @@ from sixspec.core.models import (
     SpecW5H1,
     BaseActor,
 )
+from sixspec.core.hypergraph import (
+    SpecificationHypergraph,
+    HierarchyNode,
+)
 
 __all__ = [
     "Dimension",
@@ -25,4 +31,6 @@ __all__ = [
     "CommitW5H1",
     "SpecW5H1",
     "BaseActor",
+    "SpecificationHypergraph",
+    "HierarchyNode",
 ]
