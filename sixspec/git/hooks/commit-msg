@@ -1,0 +1,75 @@
+#!/usr/bin/env python3
+"""Validate dimensional commit message format."""
+
+import sys
+import re
+from pathlib import Path
+
+
+def validate_commit_message(msg: str) -> tuple[bool, list[str]]:
+    """
+    Validate that commit message has required dimensions.
+    Returns (is_valid, errors)
+    """
+    errors = []
+
+    # Remove comment lines
+    lines = [line for line in msg.split('\n') if not line.strip().startswith('#')]
+    clean_msg = '\n'.join(lines).strip()
+
+    # Skip if empty (happens with --amend sometimes)
+    if not clean_msg:
+        return True, []
+
+    # Skip merge commits
+    if clean_msg.startswith('Merge '):
+        return True, []
+
+    # Check for subject line with type
+    first_line = clean_msg.split('\n')[0]
+    if not re.match(r'^(feat|fix|refactor|docs|test|chore):', first_line):
+        errors.append(
+            "Subject must start with type: feat|fix|refactor|docs|test|chore"
+        )
+
+    # Check for WHY
+    if not re.search(r'^WHY:\s*.+', clean_msg, re.MULTILINE):
+        errors.append("Missing required dimension: WHY")
+
+    # Check for HOW
+    if not re.search(r'^HOW:\s*.+', clean_msg, re.MULTILINE):
+        errors.append("Missing required dimension: HOW")
+
+    return len(errors) == 0, errors
+
+
+def main():
+    """Main entry point for git hook."""
+    if len(sys.argv) < 2:
+        print("Error: No commit message file provided")
+        sys.exit(1)
+
+    commit_msg_file = Path(sys.argv[1])
+
+    if not commit_msg_file.exists():
+        print(f"Error: Commit message file not found: {commit_msg_file}")
+        sys.exit(1)
+
+    msg = commit_msg_file.read_text()
+
+    is_valid, errors = validate_commit_message(msg)
+
+    if not is_valid:
+        print("❌ Invalid commit message format:")
+        for error in errors:
+            print(f"  • {error}")
+        print("\n📋 Commit messages must include WHY and HOW dimensions.")
+        print("   See .gitmessage template for examples.")
+        print("\n💡 Use 'git commit --template=.gitmessage' to load template.")
+        sys.exit(1)
+
+    sys.exit(0)
+
+
+if __name__ == "__main__":
+    main()
