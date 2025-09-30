@@ -107,11 +107,12 @@ def test_resume_continues_execution():
         }
     )
 
-    # Simulate paused state
-    walker.task.status = TaskStatus.PAUSED
+    # Simulate paused state using proper lifecycle methods
+    walker.task.start()
     walker.paused_spec = spec
     walker.add_context(Dimension.WHAT, "Deploy code")
     walker.add_context(Dimension.WHY, "Release feature")
+    walker.task.pause()
 
     # Get state before resume
     what_before = walker.context[Dimension.WHAT]
@@ -441,11 +442,12 @@ def test_multiple_pause_resume_cycles():
         }
     )
 
-    # Simulate: start → pause → resume → pause → resume
-    walker.task.status = TaskStatus.PAUSED
+    # Simulate: start → pause → resume → pause → resume using proper lifecycle methods
+    walker.task.start()
     walker.paused_spec = spec
     walker.add_context(Dimension.WHAT, "Long task")
     walker.add_context(Dimension.WHY, "Complete mission")
+    walker.task.pause()
 
     # First cycle
     walker.resume()
