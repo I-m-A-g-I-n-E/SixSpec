@@ -1,0 +1,33 @@
+# <type>: <subject>
+#
+# WHY: <why is this change needed?>
+# HOW: <how does this change work?>
+#
+# Optional dimensions:
+# WHAT: <what specifically changed?>
+# WHERE: <which files/components?>
+# WHEN: <under what conditions?>
+# WHO: <which users/systems affected?>
+#
+# Types: feat, fix, refactor, docs, test, chore
+#
+# Examples:
+#
+# fix: payment API timeout
+#
+# WHY: Users abandoning carts at 25% rate due to timeout
+# HOW: Added retry logic with exponential backoff (3 attempts)
+# WHAT: Payment intent creation flow
+# WHERE: src/payment/stripe_integration.py
+#
+# ---
+#
+# feat: add search filters
+#
+# WHY: Users cannot find products efficiently
+# HOW: Implemented faceted search with Elasticsearch
+# WHAT: Product search endpoint
+# WHERE: src/search/api.py
+# WHO: All users
+#
+# Remember: WHY and HOW are mandatory!
