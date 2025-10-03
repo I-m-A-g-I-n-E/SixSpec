@@ -14,7 +14,7 @@ Traditional software development suffers from three fundamental gaps:
 
 SixSpec makes **context**, **purpose**, and **reasoning** first-class citizens by:
 
-1. Capturing the six dimensions of every specification (W5H1)
+1. Capturing the six dimensions of every specification (5W1H)
 2. Creating traceable chains from mission to implementation
 3. Making Git history queryable and self-documenting
 4. Enabling AI agents to understand purpose, not just syntax
@@ -35,7 +35,7 @@ SixSpec makes **context**, **purpose**, and **reasoning** first-class citizens b
 "Add payment processing"
 
 # ✓ Complete
-W5H1(
+Chunk(
     subject="System",
     predicate="provides",
     object="payment processing",
@@ -109,13 +109,13 @@ def validate(result: Any) -> ValidationResult:
 **In Practice:**
 ```python
 # ✗ Eager: Forces all dimensions
-def process(spec: W5H1):
+def process(spec: Chunk):
     who = spec.dimensions[Dimension.WHO]      # KeyError if missing
     what = spec.dimensions[Dimension.WHAT]    # KeyError if missing
     why = spec.dimensions[Dimension.WHY]      # KeyError if missing
 
 # ✓ Lazy: Fetch what you need
-def process(spec: W5H1):
+def process(spec: Chunk):
     who = spec.need(Dimension.WHO)   # None if missing, no error
     if who:
         personalize_for(who)
@@ -129,7 +129,7 @@ def process(spec: W5H1):
 
 **In Practice:**
 ```python
-spec = W5H1("System", "needs", "feature")
+spec = Chunk("System", "needs", "feature")
 
 # High confidence: Requirements are clear
 spec.set(Dimension.WHO, "All users", confidence=1.0)
@@ -232,7 +232,7 @@ history.trace_file_purpose("payment.py")  # See evolution with reasons
 
 ## Design Decisions
 
-### Why W5H1?
+### Why Chunk?
 
 **Decision**: Use six dimensions (WHO, WHAT, WHEN, WHERE, HOW, WHY) instead of custom fields.
 
@@ -262,7 +262,7 @@ history.trace_file_purpose("payment.py")  # See evolution with reasons
 
 ### Why Subject-Predicate-Object?
 
-**Decision**: W5H1 uses RDF-style triples (subject-predicate-object).
+**Decision**: Chunk uses RDF-style triples (subject-predicate-object).
 
 **Rationale**:
 - Graph-friendly: Natural for relationships
@@ -326,13 +326,13 @@ history.trace_file_purpose("payment.py")  # See evolution with reasons
 
 **Example**:
 ```python
-milk = W5H1("User", "buys", "milk", dimensions={
+milk = Chunk("User", "buys", "milk", dimensions={
     Dimension.WHERE: "grocery store"
 })
-bread = W5H1("User", "buys", "bread", dimensions={
+bread = Chunk("User", "buys", "bread", dimensions={
     Dimension.WHERE: "grocery store"
 })
-hammer = W5H1("User", "buys", "hammer", dimensions={
+hammer = Chunk("User", "buys", "hammer", dimensions={
     Dimension.WHERE: "hardware store"
 })
 
@@ -402,7 +402,7 @@ L1 (Environment):  Execute precisely
 
 ```python
 # ✗ Bad: Forces irrelevant dimensions
-spec = W5H1("System", "does", "thing")
+spec = Chunk("System", "does", "thing")
 spec.set(Dimension.WHO, "N/A")      # Meaningless
 spec.set(Dimension.WHEN, "Always")  # Not helpful
 spec.set(Dimension.WHERE, "System") # Too vague
@@ -412,7 +412,7 @@ spec.set(Dimension.WHERE, "System") # Too vague
 
 ```python
 # ✓ Good: Only relevant dimensions
-commit = CommitW5H1("fix", "resolves", "bug")
+commit = CommitChunk("fix", "resolves", "bug")
 commit.set(Dimension.WHY, "Users experiencing crashes")
 commit.set(Dimension.HOW, "Added null check")
 # WHO, WHEN, WHERE optional - add if relevant
@@ -449,10 +449,10 @@ else:
 
 ```python
 # ✗ Bad: Lost purpose
-parent_spec = W5H1("System", "needs", "feature",
+parent_spec = Chunk("System", "needs", "feature",
     dimensions={Dimension.WHAT: "User authentication"})
 
-child_spec = W5H1("Dev", "implements", "OAuth")
+child_spec = Chunk("Dev", "implements", "OAuth")
 # No WHY! Lost context.
 ```
 
@@ -460,7 +460,7 @@ child_spec = W5H1("Dev", "implements", "OAuth")
 
 ```python
 # ✓ Good: Purpose preserved
-child_spec = W5H1("Dev", "implements", "OAuth",
+child_spec = Chunk("Dev", "implements", "OAuth",
     dimensions={
         Dimension.WHY: parent_spec.need(Dimension.WHAT),
         Dimension.WHAT: "OAuth2 with JWT tokens"

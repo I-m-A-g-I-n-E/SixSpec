@@ -11,7 +11,7 @@ import sys
 import os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from sixspec.core.models import W5H1, Dimension
+from sixspec.core.models import Chunk, Dimension
 from sixspec.core.hypergraph import SpecificationHypergraph
 import json
 
@@ -31,7 +31,7 @@ def demo_grocery_store_example():
     print()
     
     # Grocery shopping tasks
-    grocery1 = W5H1(
+    grocery1 = Chunk(
         subject="User",
         predicate="buys",
         object="milk",
@@ -41,7 +41,7 @@ def demo_grocery_store_example():
         }
     )
     
-    grocery2 = W5H1(
+    grocery2 = Chunk(
         subject="User",
         predicate="buys",
         object="bread",
@@ -52,7 +52,7 @@ def demo_grocery_store_example():
     )
     
     # Hardware store task
-    hardware = W5H1(
+    hardware = Chunk(
         subject="User",
         predicate="buys",
         object="hammer",
@@ -116,7 +116,7 @@ def demo_complex_organization():
     graph = SpecificationHypergraph()
     
     # Monday grocery shopping
-    monday_grocery1 = W5H1(
+    monday_grocery1 = Chunk(
         subject="User",
         predicate="buys",
         object="milk",
@@ -127,7 +127,7 @@ def demo_complex_organization():
         }
     )
     
-    monday_grocery2 = W5H1(
+    monday_grocery2 = Chunk(
         subject="User",
         predicate="buys",
         object="bread",
@@ -139,7 +139,7 @@ def demo_complex_organization():
     )
     
     # Tuesday grocery shopping (same person)
-    tuesday_grocery = W5H1(
+    tuesday_grocery = Chunk(
         subject="User",
         predicate="buys",
         object="eggs",
@@ -151,7 +151,7 @@ def demo_complex_organization():
     )
     
     # Different activity entirely
-    coding_task = W5H1(
+    coding_task = Chunk(
         subject="Developer",
         predicate="implements",
         object="feature",

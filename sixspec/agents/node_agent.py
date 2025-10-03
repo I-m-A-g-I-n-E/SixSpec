@@ -2,7 +2,7 @@
 NodeAgent: Agent that operates on individual nodes without graph awareness.
 
 This module provides the NodeAgent base class for agents that process
-individual W5H1 specifications without needing graph context.
+individual Chunk specifications without needing graph context.
 
 Key Characteristics:
 - Operates on complete, well-formed specs
@@ -14,7 +14,7 @@ Example:
     ...     def process_node(self, spec):
     ...         return f"Processed: {spec.subject}"
     >>> agent = SimpleNodeAgent("SimpleAgent", "file")
-    >>> spec = W5H1("File", "contains", "code",
+    >>> spec = Chunk("File", "contains", "code",
     ...             dimensions={Dimension.WHERE: "/path/to/file.py"})
     >>> agent.execute(spec)
     'Processed: File'
@@ -22,7 +22,7 @@ Example:
 
 from abc import abstractmethod
 from typing import Any
-from sixspec.core.models import BaseActor, W5H1
+from sixspec.core.models import BaseActor, Chunk
 
 
 class NodeAgent(BaseActor):
@@ -68,7 +68,7 @@ class NodeAgent(BaseActor):
         super().__init__(name)
         self.scope = scope
 
-    def understand(self, spec: W5H1) -> bool:
+    def understand(self, spec: Chunk) -> bool:
         """
         Check if this agent can process the given specification.
 
@@ -77,18 +77,18 @@ class NodeAgent(BaseActor):
         that the spec has at least one dimension set.
 
         Args:
-            spec: W5H1 specification to evaluate
+            spec: Chunk specification to evaluate
 
         Returns:
             True if spec is complete with dimensions, False otherwise
 
         Example:
             >>> agent = NodeAgent("TestAgent", "test")
-            >>> complete = W5H1("A", "B", "C", dimensions={
+            >>> complete = Chunk("A", "B", "C", dimensions={
             ...     Dimension.WHO: "user",
             ...     Dimension.WHAT: "action"
             ... })
-            >>> incomplete = W5H1("A", "B", "C")
+            >>> incomplete = Chunk("A", "B", "C")
             >>> agent.understand(complete)
             True  # Has dimensions
             >>> agent.understand(incomplete)
@@ -97,7 +97,7 @@ class NodeAgent(BaseActor):
         # Must have at least one dimension and satisfy required dimensions
         return len(spec.dimensions) > 0 and spec.is_complete()
 
-    def execute(self, spec: W5H1) -> Any:
+    def execute(self, spec: Chunk) -> Any:
         """
         Execute operation on this single node.
 
@@ -105,7 +105,7 @@ class NodeAgent(BaseActor):
         delegating to the subclass-specific process_node() method.
 
         Args:
-            spec: W5H1 specification to execute
+            spec: Chunk specification to execute
 
         Returns:
             Result from process_node() method
@@ -118,7 +118,7 @@ class NodeAgent(BaseActor):
             ...     def process_node(self, spec):
             ...         return spec.subject
             >>> agent = EchoAgent("Echo", "test")
-            >>> spec = W5H1("Hello", "says", "world")
+            >>> spec = Chunk("Hello", "says", "world")
             >>> agent.execute(spec)
             'Hello'
         """
@@ -132,7 +132,7 @@ class NodeAgent(BaseActor):
         return self.process_node(spec)
 
     @abstractmethod
-    def process_node(self, spec: W5H1) -> Any:
+    def process_node(self, spec: Chunk) -> Any:
         """
         Process a single node specification.
 
@@ -141,7 +141,7 @@ class NodeAgent(BaseActor):
         spec has been validated as complete.
 
         Args:
-            spec: Complete W5H1 specification to process
+            spec: Complete Chunk specification to process
 
         Returns:
             Result of processing (type varies by implementation)
@@ -151,7 +151,7 @@ class NodeAgent(BaseActor):
             ...     def process_node(self, spec):
             ...         return len(spec.dimensions)
             >>> agent = CounterAgent("Counter", "test")
-            >>> spec = W5H1("A", "B", "C", dimensions={
+            >>> spec = Chunk("A", "B", "C", dimensions={
             ...     Dimension.WHO: "user"
             ... })
             >>> agent.process_node(spec)

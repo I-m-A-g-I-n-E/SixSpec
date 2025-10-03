@@ -2,7 +2,7 @@
 Agent implementations for the SixSpec framework.
 
 This module provides concrete actor implementations that extend BaseActor:
-- NodeAgent: Operates on individual W5H1 nodes without graph awareness
+- NodeAgent: Operates on individual Chunk nodes without graph awareness
 - GraphAgent: Operates on graph structures with relationship traversal
 
 Example:

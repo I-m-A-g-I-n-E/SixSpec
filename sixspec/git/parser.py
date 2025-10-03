@@ -1,15 +1,15 @@
-"""Parse dimensional commit messages into CommitW5H1 objects."""
+"""Parse dimensional commit messages into CommitChunk objects."""
 
 import re
 import subprocess
 from pathlib import Path
 from typing import List, Optional
 
-from ..core import CommitW5H1, Dimension
+from ..core import CommitChunk, Dimension
 
 
 class CommitMessageParser:
-    """Parse dimensional commit messages into CommitW5H1 objects."""
+    """Parse dimensional commit messages into CommitChunk objects."""
 
     DIMENSION_PATTERN = re.compile(
         r'^(WHO|WHAT|WHEN|WHERE|HOW|WHY):\s*(.+)$',
@@ -19,16 +19,16 @@ class CommitMessageParser:
     SUBJECT_PATTERN = re.compile(r'^(\w+):\s*(.+)$')
 
     @classmethod
-    def parse(cls, commit_msg: str, commit_hash: str = "") -> CommitW5H1:
+    def parse(cls, commit_msg: str, commit_hash: str = "") -> CommitChunk:
         """
-        Parse commit message into CommitW5H1 object.
+        Parse commit message into CommitChunk object.
 
         Args:
             commit_msg: The commit message text
             commit_hash: The git commit hash (optional)
 
         Returns:
-            CommitW5H1 object
+            CommitChunk object
 
         Raises:
             ValueError: If message format is invalid
@@ -71,8 +71,8 @@ class CommitMessageParser:
         if commit_hash and Dimension.WHEN not in dimensions:
             dimensions[Dimension.WHEN] = f"commit {commit_hash[:8]}"
 
-        # Create CommitW5H1
-        commit = CommitW5H1(
+        # Create CommitChunk
+        commit = CommitChunk(
             subject=commit_type,
             predicate="changes",
             object=subject,
@@ -91,7 +91,7 @@ class CommitMessageParser:
         repo_path: Path,
         n: Optional[int] = None,
         skip_invalid: bool = True
-    ) -> List[CommitW5H1]:
+    ) -> List[CommitChunk]:
         """
         Parse recent commits from git log.
 
@@ -102,7 +102,7 @@ class CommitMessageParser:
                          If False, raise ValueError on invalid commits.
 
         Returns:
-            List of CommitW5H1 objects
+            List of CommitChunk objects
         """
         cmd = ['git', 'log', '--format=%H%n%B%n---END---']
         if n:

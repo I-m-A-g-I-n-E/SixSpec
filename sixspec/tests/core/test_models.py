@@ -4,9 +4,9 @@ Comprehensive tests for SixSpec core data structures.
 Tests cover:
 - Dimension enum
 - DiltsLevel enum with properties
-- W5H1 dataclass with all methods
+- Chunk dataclass with all methods
 - WHAT→WHY inheritance pattern
-- Specialized subclasses (CommitW5H1, SpecW5H1)
+- Specialized subclasses (CommitChunk, SpecChunk)
 - BaseActor abstract class
 - Edge cases and error handling
 """
@@ -17,9 +17,9 @@ from abc import ABC
 from sixspec.core.models import (
     Dimension,
     DiltsLevel,
-    W5H1,
-    CommitW5H1,
-    SpecW5H1,
+    Chunk,
+    CommitChunk,
+    SpecChunk,
     BaseActor,
 )
 
@@ -83,12 +83,12 @@ def test_dilts_level_autonomy():
 
 
 # ============================================================================
-# W5H1 Basic Functionality Tests
+# Chunk Basic Functionality Tests
 # ============================================================================
 
 def test_w5h1_creation_minimal():
-    """Test creating a minimal W5H1 object."""
-    spec = W5H1(
+    """Test creating a minimal Chunk object."""
+    spec = Chunk(
         subject="User",
         predicate="wants",
         object="feature"
@@ -102,12 +102,12 @@ def test_w5h1_creation_minimal():
 
 
 def test_w5h1_creation_with_dimensions():
-    """Test creating W5H1 with initial dimensions."""
+    """Test creating Chunk with initial dimensions."""
     dimensions = {
         Dimension.WHO: "Premium users",
         Dimension.WHAT: "Advanced reporting"
     }
-    spec = W5H1(
+    spec = Chunk(
         subject="System",
         predicate="provides",
         object="reports",
@@ -118,8 +118,8 @@ def test_w5h1_creation_with_dimensions():
 
 
 def test_w5h1_creation_with_level():
-    """Test creating W5H1 with Dilts level."""
-    spec = W5H1(
+    """Test creating Chunk with Dilts level."""
+    spec = Chunk(
         subject="Team",
         predicate="builds",
         object="product",
@@ -129,12 +129,12 @@ def test_w5h1_creation_with_level():
 
 
 # ============================================================================
-# W5H1 Method Tests: has() and need()
+# Chunk Method Tests: has() and need()
 # ============================================================================
 
 def test_w5h1_has_dimension():
     """Test has() method for dimension presence."""
-    spec = W5H1(
+    spec = Chunk(
         subject="A",
         predicate="B",
         object="C",
@@ -146,7 +146,7 @@ def test_w5h1_has_dimension():
 
 def test_w5h1_need_existing_dimension():
     """Test need() returns value for existing dimension."""
-    spec = W5H1(
+    spec = Chunk(
         subject="A",
         predicate="B",
         object="C",
@@ -157,7 +157,7 @@ def test_w5h1_need_existing_dimension():
 
 def test_w5h1_need_missing_dimension():
     """Test need() returns None for missing dimension."""
-    spec = W5H1(
+    spec = Chunk(
         subject="A",
         predicate="B",
         object="C"
@@ -178,7 +178,7 @@ def test_what_becomes_why():
     mission to execution.
     """
     # Parent defines what needs to be built
-    parent = W5H1(
+    parent = Chunk(
         subject="System",
         predicate="needs",
         object="billing",
@@ -189,7 +189,7 @@ def test_what_becomes_why():
     )
 
     # Child inherits parent's WHAT as their WHY
-    child = W5H1(
+    child = Chunk(
         subject="Developer",
         predicate="integrates",
         object="Stripe",
@@ -208,7 +208,7 @@ def test_what_becomes_why():
 def test_multilevel_purpose_propagation():
     """Test purpose propagation through multiple levels."""
     # Level 1: Mission
-    mission = W5H1(
+    mission = Chunk(
         subject="Company",
         predicate="aims",
         object="goal",
@@ -216,7 +216,7 @@ def test_multilevel_purpose_propagation():
     )
 
     # Level 2: Identity (inherits mission's WHAT as WHY)
-    identity = W5H1(
+    identity = Chunk(
         subject="Product",
         predicate="embodies",
         object="values",
@@ -227,7 +227,7 @@ def test_multilevel_purpose_propagation():
     )
 
     # Level 3: Capability (inherits identity's WHAT as WHY)
-    capability = W5H1(
+    capability = Chunk(
         subject="Team",
         predicate="develops",
         object="features",
@@ -247,12 +247,12 @@ def test_multilevel_purpose_propagation():
 
 
 # ============================================================================
-# W5H1 Method Tests: set() and get_confidence()
+# Chunk Method Tests: set() and get_confidence()
 # ============================================================================
 
 def test_w5h1_set_with_default_confidence():
     """Test set() with default confidence of 1.0."""
-    spec = W5H1(subject="A", predicate="B", object="C")
+    spec = Chunk(subject="A", predicate="B", object="C")
     spec.set(Dimension.WHO, "user")
 
     assert spec.need(Dimension.WHO) == "user"
@@ -261,7 +261,7 @@ def test_w5h1_set_with_default_confidence():
 
 def test_w5h1_set_with_custom_confidence():
     """Test set() with custom confidence score."""
-    spec = W5H1(subject="A", predicate="B", object="C")
+    spec = Chunk(subject="A", predicate="B", object="C")
     spec.set(Dimension.WHO, "Premium users", confidence=0.9)
     spec.set(Dimension.WHAT, "Advanced reporting", confidence=0.6)
 
@@ -271,7 +271,7 @@ def test_w5h1_set_with_custom_confidence():
 
 def test_w5h1_set_invalid_confidence():
     """Test set() raises error for invalid confidence."""
-    spec = W5H1(subject="A", predicate="B", object="C")
+    spec = Chunk(subject="A", predicate="B", object="C")
 
     with pytest.raises(ValueError, match="Confidence must be in"):
         spec.set(Dimension.WHO, "user", confidence=1.5)
@@ -282,13 +282,13 @@ def test_w5h1_set_invalid_confidence():
 
 def test_w5h1_get_confidence_missing_dimension():
     """Test get_confidence() returns 0.0 for unset dimension."""
-    spec = W5H1(subject="A", predicate="B", object="C")
+    spec = Chunk(subject="A", predicate="B", object="C")
     assert spec.get_confidence(Dimension.WHO) == 0.0
 
 
 def test_confidence_scores():
     """Test comprehensive confidence tracking."""
-    spec = W5H1(
+    spec = Chunk(
         subject="User",
         predicate="wants",
         object="feature"
@@ -303,12 +303,12 @@ def test_confidence_scores():
 
 
 # ============================================================================
-# W5H1 Relationship Tests: shared_dimensions() and is_same_system()
+# Chunk Relationship Tests: shared_dimensions() and is_same_system()
 # ============================================================================
 
 def test_shared_dimensions_with_overlap():
     """Test shared_dimensions() finds overlapping dimensions."""
-    spec1 = W5H1(
+    spec1 = Chunk(
         subject="A",
         predicate="B",
         object="C",
@@ -317,7 +317,7 @@ def test_shared_dimensions_with_overlap():
             Dimension.WHEN: "today"
         }
     )
-    spec2 = W5H1(
+    spec2 = Chunk(
         subject="D",
         predicate="E",
         object="F",
@@ -333,13 +333,13 @@ def test_shared_dimensions_with_overlap():
 
 def test_shared_dimensions_no_overlap():
     """Test shared_dimensions() with no overlap."""
-    spec1 = W5H1(
+    spec1 = Chunk(
         subject="A",
         predicate="B",
         object="C",
         dimensions={Dimension.WHO: "user"}
     )
-    spec2 = W5H1(
+    spec2 = Chunk(
         subject="D",
         predicate="E",
         object="F",
@@ -356,13 +356,13 @@ def test_shared_dimensions_all_overlap():
         Dimension.WHO: "user",
         Dimension.WHAT: "action"
     }
-    spec1 = W5H1(
+    spec1 = Chunk(
         subject="A",
         predicate="B",
         object="C",
         dimensions=dimensions.copy()
     )
-    spec2 = W5H1(
+    spec2 = Chunk(
         subject="D",
         predicate="E",
         object="F",
@@ -378,10 +378,10 @@ def test_same_system_rule():
     Test the "grocery store rule": ≥1 shared dimension = same system.
 
     This test validates the fundamental grouping mechanism for
-    organizing W5H1 objects into systems.
+    organizing Chunk objects into systems.
     """
     # Two purchases at the grocery store
-    grocery1 = W5H1(
+    grocery1 = Chunk(
         subject="User",
         predicate="buys",
         object="milk",
@@ -390,7 +390,7 @@ def test_same_system_rule():
             Dimension.WHEN: "today"
         }
     )
-    grocery2 = W5H1(
+    grocery2 = Chunk(
         subject="User",
         predicate="buys",
         object="bread",
@@ -401,7 +401,7 @@ def test_same_system_rule():
     )
 
     # Purchase at hardware store (shares WHERE and WHEN dimensions, different values)
-    hardware = W5H1(
+    hardware = Chunk(
         subject="User",
         predicate="buys",
         object="hammer",
@@ -412,7 +412,7 @@ def test_same_system_rule():
     )
 
     # Purchase online (shares only WHEN dimension)
-    online = W5H1(
+    online = Chunk(
         subject="User",
         predicate="buys",
         object="book",
@@ -440,13 +440,13 @@ def test_same_system_rule():
 
 def test_is_same_system_no_overlap():
     """Test is_same_system() returns False when no dimensions shared."""
-    spec1 = W5H1(
+    spec1 = Chunk(
         subject="A",
         predicate="B",
         object="C",
         dimensions={Dimension.WHO: "user"}
     )
-    spec2 = W5H1(
+    spec2 = Chunk(
         subject="D",
         predicate="E",
         object="F",
@@ -457,12 +457,12 @@ def test_is_same_system_no_overlap():
 
 
 # ============================================================================
-# W5H1 Utility Method Tests
+# Chunk Utility Method Tests
 # ============================================================================
 
 def test_copy_with_basic():
     """Test copy_with() creates new instance with updates."""
-    original = W5H1(
+    original = Chunk(
         subject="A",
         predicate="B",
         object="C",
@@ -482,7 +482,7 @@ def test_copy_with_basic():
 
 def test_copy_with_dimensions():
     """Test copy_with() can update dimensions."""
-    original = W5H1(
+    original = Chunk(
         subject="A",
         predicate="B",
         object="C",
@@ -503,7 +503,7 @@ def test_copy_with_dimensions():
 
 def test_copy_with_level():
     """Test copy_with() can update level."""
-    original = W5H1(
+    original = Chunk(
         subject="A",
         predicate="B",
         object="C",
@@ -517,24 +517,24 @@ def test_copy_with_level():
 
 
 def test_required_dimensions_base():
-    """Test base W5H1 has no required dimensions."""
-    spec = W5H1(subject="A", predicate="B", object="C")
+    """Test base Chunk has no required dimensions."""
+    spec = Chunk(subject="A", predicate="B", object="C")
     assert spec.required_dimensions() == set()
 
 
 def test_is_complete_base():
-    """Test base W5H1 is always complete (no requirements)."""
-    spec = W5H1(subject="A", predicate="B", object="C")
+    """Test base Chunk is always complete (no requirements)."""
+    spec = Chunk(subject="A", predicate="B", object="C")
     assert spec.is_complete() is True
 
 
 # ============================================================================
-# W5H1 Serialization Tests
+# Chunk Serialization Tests
 # ============================================================================
 
 def test_to_dict_minimal():
-    """Test to_dict() with minimal W5H1."""
-    spec = W5H1(subject="A", predicate="B", object="C")
+    """Test to_dict() with minimal Chunk."""
+    spec = Chunk(subject="A", predicate="B", object="C")
     data = spec.to_dict()
 
     assert data['subject'] == "A"
@@ -546,8 +546,8 @@ def test_to_dict_minimal():
 
 
 def test_to_dict_full():
-    """Test to_dict() with complete W5H1."""
-    spec = W5H1(
+    """Test to_dict() with complete Chunk."""
+    spec = Chunk(
         subject="A",
         predicate="B",
         object="C",
@@ -573,7 +573,7 @@ def test_from_dict_minimal():
         'confidence': {},
         'level': None
     }
-    spec = W5H1.from_dict(data)
+    spec = Chunk.from_dict(data)
 
     assert spec.subject == "A"
     assert spec.predicate == "B"
@@ -592,7 +592,7 @@ def test_from_dict_full():
         'confidence': {'who': 0.9},
         'level': 2
     }
-    spec = W5H1.from_dict(data)
+    spec = Chunk.from_dict(data)
 
     assert spec.subject == "A"
     assert spec.need(Dimension.WHO) == "user"
@@ -603,7 +603,7 @@ def test_from_dict_full():
 
 def test_serialization_round_trip():
     """Test that to_dict() → from_dict() preserves data."""
-    original = W5H1(
+    original = Chunk(
         subject="User",
         predicate="wants",
         object="feature",
@@ -620,7 +620,7 @@ def test_serialization_round_trip():
 
     # Serialize and deserialize
     data = original.to_dict()
-    restored = W5H1.from_dict(data)
+    restored = Chunk.from_dict(data)
 
     # Verify all data preserved
     assert restored.subject == original.subject
@@ -632,12 +632,12 @@ def test_serialization_round_trip():
 
 
 # ============================================================================
-# CommitW5H1 Specialized Subclass Tests
+# CommitChunk Specialized Subclass Tests
 # ============================================================================
 
 def test_commit_w5h1_required_dimensions():
-    """Test CommitW5H1 requires WHY and HOW."""
-    commit = CommitW5H1(
+    """Test CommitChunk requires WHY and HOW."""
+    commit = CommitChunk(
         subject="Developer",
         predicate="implements",
         object="feature"
@@ -646,8 +646,8 @@ def test_commit_w5h1_required_dimensions():
 
 
 def test_commit_w5h1_is_complete_false():
-    """Test CommitW5H1 is incomplete without WHY and HOW."""
-    commit = CommitW5H1(
+    """Test CommitChunk is incomplete without WHY and HOW."""
+    commit = CommitChunk(
         subject="Developer",
         predicate="implements",
         object="feature",
@@ -657,8 +657,8 @@ def test_commit_w5h1_is_complete_false():
 
 
 def test_commit_w5h1_is_complete_true():
-    """Test CommitW5H1 is complete with WHY and HOW."""
-    commit = CommitW5H1(
+    """Test CommitChunk is complete with WHY and HOW."""
+    commit = CommitChunk(
         subject="Developer",
         predicate="implements",
         object="feature",
@@ -671,8 +671,8 @@ def test_commit_w5h1_is_complete_true():
 
 
 def test_commit_w5h1_inherits_w5h1_methods():
-    """Test CommitW5H1 inherits all W5H1 methods."""
-    commit = CommitW5H1(
+    """Test CommitChunk inherits all Chunk methods."""
+    commit = CommitChunk(
         subject="Dev",
         predicate="codes",
         object="feature"
@@ -688,12 +688,12 @@ def test_commit_w5h1_inherits_w5h1_methods():
 
 
 # ============================================================================
-# SpecW5H1 Specialized Subclass Tests
+# SpecChunk Specialized Subclass Tests
 # ============================================================================
 
 def test_spec_w5h1_required_dimensions():
-    """Test SpecW5H1 requires WHO, WHAT, and WHY."""
-    spec = SpecW5H1(
+    """Test SpecChunk requires WHO, WHAT, and WHY."""
+    spec = SpecChunk(
         subject="System",
         predicate="provides",
         object="feature"
@@ -706,8 +706,8 @@ def test_spec_w5h1_required_dimensions():
 
 
 def test_spec_w5h1_is_complete_false():
-    """Test SpecW5H1 is incomplete without all required dimensions."""
-    spec = SpecW5H1(
+    """Test SpecChunk is incomplete without all required dimensions."""
+    spec = SpecChunk(
         subject="System",
         predicate="provides",
         object="feature",
@@ -720,8 +720,8 @@ def test_spec_w5h1_is_complete_false():
 
 
 def test_spec_w5h1_is_complete_true():
-    """Test SpecW5H1 is complete with WHO, WHAT, and WHY."""
-    spec = SpecW5H1(
+    """Test SpecChunk is complete with WHO, WHAT, and WHY."""
+    spec = SpecChunk(
         subject="System",
         predicate="provides",
         object="authentication",
@@ -735,8 +735,8 @@ def test_spec_w5h1_is_complete_true():
 
 
 def test_spec_w5h1_inherits_w5h1_methods():
-    """Test SpecW5H1 inherits all W5H1 methods."""
-    spec = SpecW5H1(
+    """Test SpecChunk inherits all Chunk methods."""
+    spec = SpecChunk(
         subject="System",
         predicate="does",
         object="thing"
@@ -761,10 +761,10 @@ def test_base_actor_is_abstract():
 def test_base_actor_implementation():
     """Test concrete implementation of BaseActor."""
     class SimpleActor(BaseActor):
-        def understand(self, spec: W5H1) -> bool:
+        def understand(self, spec: Chunk) -> bool:
             return spec.has(Dimension.WHAT)
 
-        def execute(self, spec: W5H1) -> str:
+        def execute(self, spec: Chunk) -> str:
             return f"Executing: {spec.need(Dimension.WHAT)}"
 
     actor = SimpleActor("TestActor")
@@ -775,21 +775,21 @@ def test_base_actor_implementation():
 def test_base_actor_understand():
     """Test understand() method in concrete implementation."""
     class SimpleActor(BaseActor):
-        def understand(self, spec: W5H1) -> bool:
+        def understand(self, spec: Chunk) -> bool:
             return spec.has(Dimension.WHAT)
 
-        def execute(self, spec: W5H1) -> str:
+        def execute(self, spec: Chunk) -> str:
             return "executed"
 
     actor = SimpleActor("TestActor")
 
-    spec_with_what = W5H1(
+    spec_with_what = Chunk(
         subject="A",
         predicate="B",
         object="C",
         dimensions={Dimension.WHAT: "task"}
     )
-    spec_without_what = W5H1(
+    spec_without_what = Chunk(
         subject="A",
         predicate="B",
         object="C"
@@ -802,14 +802,14 @@ def test_base_actor_understand():
 def test_base_actor_execute():
     """Test execute() method in concrete implementation."""
     class SimpleActor(BaseActor):
-        def understand(self, spec: W5H1) -> bool:
+        def understand(self, spec: Chunk) -> bool:
             return True
 
-        def execute(self, spec: W5H1) -> str:
+        def execute(self, spec: Chunk) -> str:
             return f"Executing: {spec.need(Dimension.WHAT)}"
 
     actor = SimpleActor("TestActor")
-    spec = W5H1(
+    spec = Chunk(
         subject="A",
         predicate="B",
         object="C",
@@ -823,16 +823,16 @@ def test_base_actor_execute():
 def test_base_actor_context():
     """Test that actors can maintain dimensional context."""
     class ContextualActor(BaseActor):
-        def understand(self, spec: W5H1) -> bool:
+        def understand(self, spec: Chunk) -> bool:
             return True
 
-        def execute(self, spec: W5H1) -> None:
+        def execute(self, spec: Chunk) -> None:
             # Store dimension in context
             if spec.has(Dimension.WHO):
                 self.context[Dimension.WHO] = spec.need(Dimension.WHO)
 
     actor = ContextualActor("ContextActor")
-    spec = W5H1(
+    spec = Chunk(
         subject="A",
         predicate="B",
         object="C",
@@ -848,8 +848,8 @@ def test_base_actor_context():
 # ============================================================================
 
 def test_w5h1_empty_dimensions():
-    """Test W5H1 handles empty dimensions gracefully."""
-    spec = W5H1(
+    """Test Chunk handles empty dimensions gracefully."""
+    spec = Chunk(
         subject="A",
         predicate="B",
         object="C",
@@ -862,8 +862,8 @@ def test_w5h1_empty_dimensions():
 
 
 def test_w5h1_none_values():
-    """Test W5H1 behavior with None dimension values."""
-    spec = W5H1(subject="A", predicate="B", object="C")
+    """Test Chunk behavior with None dimension values."""
+    spec = Chunk(subject="A", predicate="B", object="C")
 
     # Need returns None for unset dimension
     assert spec.need(Dimension.WHO) is None
@@ -874,7 +874,7 @@ def test_w5h1_none_values():
 
 def test_dimension_overwrite():
     """Test that setting a dimension twice overwrites the first value."""
-    spec = W5H1(subject="A", predicate="B", object="C")
+    spec = Chunk(subject="A", predicate="B", object="C")
 
     spec.set(Dimension.WHO, "user1", confidence=0.5)
     assert spec.need(Dimension.WHO) == "user1"
@@ -887,7 +887,7 @@ def test_dimension_overwrite():
 
 def test_confidence_boundary_values():
     """Test confidence accepts boundary values 0.0 and 1.0."""
-    spec = W5H1(subject="A", predicate="B", object="C")
+    spec = Chunk(subject="A", predicate="B", object="C")
 
     spec.set(Dimension.WHO, "user1", confidence=0.0)
     assert spec.get_confidence(Dimension.WHO) == 0.0
@@ -898,8 +898,8 @@ def test_confidence_boundary_values():
 
 def test_shared_dimensions_empty_specs():
     """Test shared_dimensions() with empty dimension dicts."""
-    spec1 = W5H1(subject="A", predicate="B", object="C")
-    spec2 = W5H1(subject="D", predicate="E", object="F")
+    spec1 = Chunk(subject="A", predicate="B", object="C")
+    spec2 = Chunk(subject="D", predicate="E", object="F")
 
     assert spec1.shared_dimensions(spec2) == set()
     assert spec1.is_same_system(spec2) is False
@@ -907,7 +907,7 @@ def test_shared_dimensions_empty_specs():
 
 def test_copy_with_no_updates():
     """Test copy_with() with no updates creates identical copy."""
-    original = W5H1(
+    original = Chunk(
         subject="A",
         predicate="B",
         object="C",
@@ -932,7 +932,7 @@ def test_from_dict_missing_optional_fields():
         'predicate': 'B',
         'object': 'C'
     }
-    spec = W5H1.from_dict(data)
+    spec = Chunk.from_dict(data)
 
     assert spec.dimensions == {}
     assert spec.confidence == {}

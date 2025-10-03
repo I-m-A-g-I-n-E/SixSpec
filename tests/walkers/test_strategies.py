@@ -9,7 +9,7 @@ Tests cover:
 """
 
 import pytest
-from sixspec.core.models import Dimension, DiltsLevel, W5H1
+from sixspec.core.models import Dimension, DiltsLevel, Chunk
 from sixspec.walkers.strategies.mission_strategy import MissionWalker
 from sixspec.walkers.strategies.capability_strategy import CapabilityWalker
 from sixspec.walkers.dilts_walker import ValidationResult
@@ -28,7 +28,7 @@ class TestMissionWalker:
     def test_generate_strategies(self):
         """Test strategic option generation at Mission level."""
         walker = MissionWalker()
-        spec = W5H1(
+        spec = Chunk(
             subject="Company",
             predicate="aims to",
             object="growth",
@@ -47,7 +47,7 @@ class TestMissionWalker:
     def test_generate_many_strategies(self):
         """Test generating large number of strategies."""
         walker = MissionWalker()
-        spec = W5H1(
+        spec = Chunk(
             subject="Company",
             predicate="aims",
             object="goal",
@@ -86,7 +86,7 @@ class TestMissionWalker:
     def test_full_execution(self):
         """Test full Mission-level execution."""
         walker = MissionWalker()
-        spec = W5H1(
+        spec = Chunk(
             subject="Company",
             predicate="aims",
             object="success",
@@ -114,7 +114,7 @@ class TestCapabilityWalker:
     def test_generate_strategies(self):
         """Test implementation approach generation at Capability level."""
         walker = CapabilityWalker()
-        spec = W5H1(
+        spec = Chunk(
             subject="System",
             predicate="needs",
             object="feature",
@@ -133,7 +133,7 @@ class TestCapabilityWalker:
     def test_generate_strategies_with_why(self):
         """Test strategy generation with WHY context."""
         walker = CapabilityWalker()
-        spec = W5H1(
+        spec = Chunk(
             subject="System",
             predicate="builds",
             object="component",
@@ -185,7 +185,7 @@ class TestCapabilityWalker:
     def test_full_execution(self):
         """Test full Capability-level execution."""
         walker = CapabilityWalker()
-        spec = W5H1(
+        spec = Chunk(
             subject="System",
             predicate="implements",
             object="feature",
@@ -216,13 +216,13 @@ class TestStrategyDifferences:
 
     def test_strategy_variation(self):
         """Test that strategies vary by level."""
-        mission_spec = W5H1(
+        mission_spec = Chunk(
             subject="Company",
             predicate="aims",
             object="growth",
             dimensions={Dimension.WHAT: "Achieve goal"}
         )
-        capability_spec = W5H1(
+        capability_spec = Chunk(
             subject="System",
             predicate="needs",
             object="feature",
@@ -265,7 +265,7 @@ class TestPortfolioExecution:
     def test_mission_portfolio(self):
         """Test portfolio execution at Mission level."""
         walker = MissionWalker()
-        spec = W5H1(
+        spec = Chunk(
             subject="Company",
             predicate="needs",
             object="success",
@@ -280,7 +280,7 @@ class TestPortfolioExecution:
     def test_capability_portfolio(self):
         """Test portfolio execution at Capability level."""
         walker = CapabilityWalker()
-        spec = W5H1(
+        spec = Chunk(
             subject="System",
             predicate="needs",
             object="payment",
@@ -298,7 +298,7 @@ class TestPortfolioExecution:
     def test_portfolio_picks_best(self):
         """Test that portfolio picks best result."""
         walker = CapabilityWalker()
-        spec = W5H1(
+        spec = Chunk(
             subject="System",
             predicate="does",
             object="task",
@@ -319,7 +319,7 @@ class TestWalkerInheritance:
     def test_child_inherits_why(self):
         """Test that child inherits parent's WHAT as WHY."""
         parent = CapabilityWalker()
-        parent_spec = W5H1(
+        parent_spec = Chunk(
             subject="System",
             predicate="builds",
             object="feature",
@@ -335,7 +335,7 @@ class TestWalkerInheritance:
     def test_mission_spawns_identity(self):
         """Test that Mission spawns Identity-level children."""
         mission = MissionWalker()
-        spec = W5H1(
+        spec = Chunk(
             subject="Company",
             predicate="aims",
             object="goal",

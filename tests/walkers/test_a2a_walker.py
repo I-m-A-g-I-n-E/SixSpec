@@ -13,7 +13,7 @@ Tests cover:
 
 import pytest
 from sixspec.a2a import TaskStatus
-from sixspec.core.models import Dimension, DiltsLevel, W5H1
+from sixspec.core.models import Dimension, DiltsLevel, Chunk
 from sixspec.walkers.a2a_walker import A2AWalker
 
 
@@ -24,7 +24,7 @@ def test_task_lifecycle_basic():
     A2AWalker should create task and manage its lifecycle.
     """
     walker = A2AWalker(level=DiltsLevel.ENVIRONMENT)
-    spec = W5H1(
+    spec = Chunk(
         subject="System",
         predicate="executes",
         object="action",
@@ -97,7 +97,7 @@ def test_resume_continues_execution():
     After resume, walker should continue with same WHAT→WHY chain.
     """
     walker = A2AWalker(level=DiltsLevel.ENVIRONMENT)
-    spec = W5H1(
+    spec = Chunk(
         subject="System",
         predicate="executes",
         object="action",
@@ -274,7 +274,7 @@ def test_full_pause_inspect_resume_workflow():
     """
     # Start mission
     mission = A2AWalker(level=DiltsLevel.MISSION)
-    spec = W5H1(
+    spec = Chunk(
         subject="Company",
         predicate="aims",
         object="growth",
@@ -327,7 +327,7 @@ def test_child_inherits_parent_what_as_why():
     Core DiltsWalker functionality should still work with A2A.
     """
     parent = A2AWalker(level=DiltsLevel.IDENTITY)
-    parent_spec = W5H1(
+    parent_spec = Chunk(
         subject="Company",
         predicate="launches",
         object="product",
@@ -350,7 +350,7 @@ def test_execution_with_hierarchy():
     Ensures _create_child() override works correctly.
     """
     walker = A2AWalker(level=DiltsLevel.BELIEFS)
-    spec = W5H1(
+    spec = Chunk(
         subject="System",
         predicate="needs",
         object="feature",
@@ -384,7 +384,7 @@ def test_error_handling():
 
     failing_walker = FailingWalker(level=DiltsLevel.ENVIRONMENT)
 
-    spec = W5H1(
+    spec = Chunk(
         subject="System",
         predicate="executes",
         object="action",
@@ -432,7 +432,7 @@ def test_multiple_pause_resume_cycles():
     Should handle multiple interruptions correctly.
     """
     walker = A2AWalker(level=DiltsLevel.ENVIRONMENT)
-    spec = W5H1(
+    spec = Chunk(
         subject="System",
         predicate="executes",
         object="action",

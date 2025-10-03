@@ -5,7 +5,7 @@ from setuptools import setup, find_packages
 setup(
     name="sixspec",
     version="0.1.0",
-    description="Dimensional specification framework with W5H1 objects",
+    description="Dimensional specification framework with Chunk objects",
     author="SixSpec Contributors",
     packages=find_packages(),
     python_requires=">=3.9",

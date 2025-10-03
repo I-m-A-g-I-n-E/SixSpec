@@ -4,7 +4,7 @@ Welcome to SixSpec! This tutorial will teach you the framework from the ground u
 
 ## Learning Path
 
-1. **Basics**: Understanding W5H1 and dimensions
+1. **Basics**: Understanding Chunk and dimensions
 2. **Git Integration**: Dimensional commits
 3. **Agents**: Building dimensional-aware agents
 4. **Walkers**: Hierarchical execution
@@ -12,11 +12,11 @@ Welcome to SixSpec! This tutorial will teach you the framework from the ground u
 
 ---
 
-## Part 1: Understanding W5H1
+## Part 1: Understanding Chunk
 
-### What is W5H1?
+### What is Chunk?
 
-W5H1 is a dimensional specification model that captures complete context using six dimensions:
+Chunk is a dimensional specification model that captures complete context using six dimensions:
 - **WHO**: Actors, stakeholders
 - **WHAT**: Actions, objects
 - **WHEN**: Temporal context
@@ -24,13 +24,13 @@ W5H1 is a dimensional specification model that captures complete context using s
 - **HOW**: Methods, processes
 - **WHY**: Purpose, motivation
 
-### Exercise 1.1: Your First W5H1 Spec
+### Exercise 1.1: Your First Chunk Spec
 
 ```python
-from sixspec.core import W5H1, Dimension
+from sixspec.core import Chunk, Dimension
 
 # Create a simple specification
-spec = W5H1(
+spec = Chunk(
     subject="User",
     predicate="wants",
     object="feature"
@@ -62,7 +62,7 @@ if spec.has(Dimension.WHO):
 
 ```python
 # Add dimensions with confidence scores
-spec = W5H1("System", "needs", "authentication")
+spec = Chunk("System", "needs", "authentication")
 
 # High confidence: Requirements are clear
 spec.set(Dimension.WHO, "All users", confidence=1.0)
@@ -87,13 +87,13 @@ for dim in [Dimension.WHO, Dimension.HOW, Dimension.WHERE]:
 - 0.4-0.6: Possible, needs validation
 - 0.0-0.3: Speculative, placeholder
 
-### Exercise 1.3: Specialized W5H1 Types
+### Exercise 1.3: Specialized Chunk Types
 
 ```python
-from sixspec.core import CommitW5H1, SpecW5H1
+from sixspec.core import CommitChunk, SpecChunk
 
-# CommitW5H1: Requires WHY + HOW
-commit = CommitW5H1(
+# Commit5W1H: Requires WHY + HOW
+commit = CommitChunk(
     subject="fix",
     predicate="resolves",
     object="timeout issue",
@@ -105,8 +105,8 @@ commit = CommitW5H1(
 
 print(commit.is_complete())  # True
 
-# SpecW5H1: Requires WHO + WHAT + WHY
-full_spec = SpecW5H1(
+# Spec5W1H: Requires WHO + WHAT + WHY
+full_spec = SpecChunk(
     subject="System",
     predicate="provides",
     object="authentication",
@@ -242,7 +242,7 @@ NodeAgents operate on isolated specifications without needing graph context.
 
 ```python
 from sixspec.agents import NodeAgent
-from sixspec.core import W5H1, Dimension
+from sixspec.core import Chunk, Dimension
 
 class GreetingAgent(NodeAgent):
     """Agent that generates greetings based on WHO dimension"""
@@ -250,7 +250,7 @@ class GreetingAgent(NodeAgent):
     def __init__(self):
         super().__init__("GreetingAgent", scope="greeting")
 
-    def process_node(self, spec: W5H1) -> str:
+    def process_node(self, spec: Chunk) -> str:
         who = spec.need(Dimension.WHO) or "friend"
         what = spec.need(Dimension.WHAT) or "hello"
         return f"{what.capitalize()}, {who}!"
@@ -258,7 +258,7 @@ class GreetingAgent(NodeAgent):
 # Use the agent
 agent = GreetingAgent()
 
-spec = W5H1(
+spec = Chunk(
     subject="Agent",
     predicate="greets",
     object="user",
@@ -281,7 +281,7 @@ class ValidationAgent(NodeAgent):
     def __init__(self):
         super().__init__("ValidationAgent", scope="spec")
 
-    def process_node(self, spec: W5H1) -> dict:
+    def process_node(self, spec: Chunk) -> dict:
         """Returns validation report"""
         report = {
             "complete": spec.is_complete(),
@@ -304,7 +304,7 @@ class ValidationAgent(NodeAgent):
 # Use the agent
 validator = ValidationAgent()
 
-spec = SpecW5H1(
+spec = SpecChunk(
     subject="System",
     predicate="needs",
     object="feature",
@@ -339,7 +339,7 @@ class ContextGatherer(GraphAgent):
     def __init__(self):
         super().__init__("ContextGatherer")
 
-    def traverse(self, start: W5H1) -> dict:
+    def traverse(self, start: Chunk) -> dict:
         """Gather context and return analysis"""
         self.current_node = start
 
@@ -356,7 +356,7 @@ class ContextGatherer(GraphAgent):
 # Use the agent
 gatherer = ContextGatherer()
 
-spec = W5H1(
+spec = Chunk(
     subject="Developer",
     predicate="implements",
     object="feature",
@@ -382,13 +382,13 @@ Walkers implement the core SixSpec pattern: hierarchical delegation with WHAT→
 
 ```python
 from sixspec.walkers import DiltsWalker
-from sixspec.core import DiltsLevel, W5H1, Dimension
+from sixspec.core import DiltsLevel, Chunk, Dimension
 
 # Create parent walker at Level 3 (Capability)
 parent = DiltsWalker(level=DiltsLevel.CAPABILITY)
 
 # Execute parent spec
-parent_spec = W5H1(
+parent_spec = Chunk(
     subject="Team",
     predicate="builds",
     object="payment system",
@@ -428,12 +428,12 @@ Grandchild: WHY = "Implement Stripe webhooks"
 
 ```python
 from sixspec.walkers import DiltsWalker
-from sixspec.core import DiltsLevel, W5H1, Dimension
+from sixspec.core import DiltsLevel, Chunk, Dimension
 
 # Start at Capability level (L3)
 walker = DiltsWalker(level=DiltsLevel.CAPABILITY)
 
-spec = W5H1(
+spec = Chunk(
     subject="System",
     predicate="needs",
     object="authentication",
@@ -469,7 +469,7 @@ print_walker_tree(walker)
 ```python
 # After execution, trace back the WHY chain
 walker = DiltsWalker(level=DiltsLevel.CAPABILITY)
-spec = W5H1(
+spec = Chunk(
     subject="Team",
     predicate="builds",
     object="feature",
@@ -507,7 +507,7 @@ Portfolio execution tries multiple strategies and picks the winner based on vali
 
 ```python
 from sixspec.walkers import DiltsWalker, ValidationResult
-from sixspec.core import DiltsLevel, W5H1, Dimension
+from sixspec.core import DiltsLevel, Chunk, Dimension
 
 class PaymentWalker(DiltsWalker):
     """Custom walker that tries multiple payment integrations"""
@@ -515,7 +515,7 @@ class PaymentWalker(DiltsWalker):
     def __init__(self):
         super().__init__(level=DiltsLevel.CAPABILITY)
 
-    def generate_strategies(self, spec: W5H1, n: int) -> list:
+    def generate_strategies(self, spec: Chunk, n: int) -> list:
         """Generate different payment integration strategies"""
         return [
             "Integrate Stripe with hosted checkout",
@@ -557,7 +557,7 @@ class PaymentWalker(DiltsWalker):
 # Use portfolio execution
 walker = PaymentWalker()
 
-spec = W5H1(
+spec = Chunk(
     subject="System",
     predicate="needs",
     object="payment",
@@ -584,7 +584,7 @@ A2A (Agent-to-Agent) protocol enables graceful interruption and resume.
 
 ```python
 from sixspec.walkers import A2AWalker
-from sixspec.core import DiltsLevel, W5H1, Dimension
+from sixspec.core import DiltsLevel, Chunk, Dimension
 from sixspec.a2a import TaskStatus
 import time
 
@@ -600,7 +600,7 @@ def handle_status_update(update):
 walker.task.on_status_change(handle_status_update)
 
 # Create spec
-spec = W5H1(
+spec = Chunk(
     subject="System",
     predicate="processes",
     object="data",
@@ -641,7 +641,7 @@ print(f"Result: {walker.task.result}")
 
 ```python
 from sixspec.walkers import DiltsWalker
-from sixspec.core import DiltsLevel, W5H1, Dimension, CommitW5H1
+from sixspec.core import DiltsLevel, Chunk, Dimension, CommitChunk
 
 class TestGenerationWalker(DiltsWalker):
     """Walker that generates tests based on commit dimensions"""
@@ -649,7 +649,7 @@ class TestGenerationWalker(DiltsWalker):
     def __init__(self):
         super().__init__(level=DiltsLevel.BEHAVIOR)
 
-    def generate_strategies(self, spec: W5H1, n: int) -> list:
+    def generate_strategies(self, spec: Chunk, n: int) -> list:
         """Generate different test strategies based on HOW dimension"""
         how = spec.need(Dimension.HOW) or "implementation"
 
@@ -689,7 +689,7 @@ class TestGenerationWalker(DiltsWalker):
 walker = TestGenerationWalker()
 
 # Create spec from a commit
-commit_spec = CommitW5H1(
+commit_spec = CommitChunk(
     subject="feat",
     predicate="adds",
     object="search feature",
@@ -717,7 +717,7 @@ Let's build a complete example: A documentation generator that reads commits and
 
 ```python
 from sixspec.agents import NodeAgent
-from sixspec.core import W5H1, Dimension, CommitW5H1
+from sixspec.core import Chunk, Dimension, CommitChunk
 from sixspec.git.history import DimensionalGitHistory
 from pathlib import Path
 
@@ -727,9 +727,9 @@ class DocGeneratorAgent(NodeAgent):
     def __init__(self):
         super().__init__("DocGenerator", scope="commit")
 
-    def process_node(self, spec: W5H1) -> str:
+    def process_node(self, spec: Chunk) -> str:
         """Generate documentation from a commit spec"""
-        if not isinstance(spec, CommitW5H1):
+        if not isinstance(spec, CommitChunk):
             raise ValueError("DocGenerator only works with commits")
 
         # Extract information
@@ -772,7 +772,7 @@ for commit in features[:5]:  # First 5 features
 
 ```python
 from sixspec.walkers import DiltsWalker
-from sixspec.core import DiltsLevel, W5H1, Dimension
+from sixspec.core import DiltsLevel, Chunk, Dimension
 from sixspec.git.history import DimensionalGitHistory
 from pathlib import Path
 
@@ -782,7 +782,7 @@ class DocumentationWalker(DiltsWalker):
     def __init__(self):
         super().__init__(level=DiltsLevel.CAPABILITY)
 
-    def generate_strategies(self, spec: W5H1, n: int) -> list:
+    def generate_strategies(self, spec: Chunk, n: int) -> list:
         """Different documentation strategies"""
         return [
             "Generate API reference from commits",
@@ -811,7 +811,7 @@ class DocumentationWalker(DiltsWalker):
 walker = DocumentationWalker()
 
 # Create spec
-spec = W5H1(
+spec = Chunk(
     subject="Team",
     predicate="generates",
     object="documentation",
@@ -835,7 +835,7 @@ print(f"Result: {result}")
 
 Congratulations! You've learned:
 
-1. ✅ W5H1 dimensional specifications
+1. ✅ Chunk dimensional specifications
 2. ✅ Git integration with dimensional commits
 3. ✅ Building NodeAgents and GraphAgents
 4. ✅ Hierarchical walkers with WHAT→WHY propagation

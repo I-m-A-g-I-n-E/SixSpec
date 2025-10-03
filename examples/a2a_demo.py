@@ -12,7 +12,7 @@ Run this file to see A2A task lifecycle in action:
     python examples/a2a_demo.py
 """
 
-from sixspec.core.models import Dimension, DiltsLevel, W5H1
+from sixspec.core.models import Dimension, DiltsLevel, Chunk
 from sixspec.walkers.a2a_walker import A2AWalker
 
 

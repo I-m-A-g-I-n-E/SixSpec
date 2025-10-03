@@ -16,9 +16,9 @@ Strategy Implementations:
 
 Example:
     >>> from sixspec.walkers import MissionWalker
-    >>> from sixspec.core.models import W5H1, Dimension
+    >>> from sixspec.core.models import Chunk, Dimension
     >>> walker = MissionWalker()
-    >>> spec = W5H1(
+    >>> spec = Chunk(
     ...     subject="Company",
     ...     predicate="aims",
     ...     object="growth",

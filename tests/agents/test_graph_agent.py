@@ -11,13 +11,13 @@ These tests verify that GraphAgent correctly:
 
 import pytest
 from sixspec.agents.graph_agent import GraphAgent
-from sixspec.core.models import W5H1, Dimension
+from sixspec.core.models import Chunk, Dimension
 
 
 class TestGraphAgent(GraphAgent):
     """Test implementation of GraphAgent for testing."""
 
-    def traverse(self, start: W5H1) -> list:
+    def traverse(self, start: Chunk) -> list:
         """Simple implementation that returns visited nodes."""
         return list(self.visited)
 
@@ -37,7 +37,7 @@ def test_graph_agent_understands_partial_spec():
     agent = TestGraphAgent("TestAgent")
 
     # Partial spec with just one dimension
-    partial = W5H1(
+    partial = Chunk(
         subject="Payment",
         predicate="processes",
         object="transaction",
@@ -53,7 +53,7 @@ def test_graph_agent_rejects_empty_spec():
     agent = TestGraphAgent("TestAgent")
 
     # Empty spec without any dimensions
-    empty = W5H1(
+    empty = Chunk(
         subject="Empty",
         predicate="has",
         object="nothing",
@@ -66,7 +66,7 @@ def test_graph_agent_execute_sets_state():
     """Test that execute() properly sets traversal state."""
     agent = TestGraphAgent("TestAgent")
 
-    spec = W5H1(
+    spec = Chunk(
         subject="Test",
         predicate="does",
         object="thing",
@@ -82,9 +82,9 @@ def test_graph_agent_execute_sets_state():
 
 def test_graph_agent_node_id_generation():
     """Test node_id() generates unique identifiers."""
-    node1 = W5H1("A", "does", "X")
-    node2 = W5H1("A", "does", "Y")
-    node3 = W5H1("B", "does", "X")
+    node1 = Chunk("A", "does", "X")
+    node2 = Chunk("A", "does", "Y")
+    node3 = Chunk("B", "does", "X")
 
     id1 = GraphAgent.node_id(node1)
     id2 = GraphAgent.node_id(node2)
@@ -101,28 +101,28 @@ def test_graph_agent_find_neighbors_by_shared_dimensions():
     """Test finding neighbors that share dimensions."""
     agent = TestGraphAgent("TestAgent")
 
-    node = W5H1(
+    node = Chunk(
         subject="A",
         predicate="does",
         object="X",
         dimensions={Dimension.WHERE: "service_a"}
     )
 
-    neighbor1 = W5H1(
+    neighbor1 = Chunk(
         subject="B",
         predicate="does",
         object="Y",
         dimensions={Dimension.WHERE: "service_a"}  # Shares WHERE
     )
 
-    neighbor2 = W5H1(
+    neighbor2 = Chunk(
         subject="C",
         predicate="does",
         object="Z",
         dimensions={Dimension.WHERE: "service_a"}  # Shares WHERE
     )
 
-    unrelated = W5H1(
+    unrelated = Chunk(
         subject="D",
         predicate="does",
         object="W",
@@ -143,7 +143,7 @@ def test_graph_agent_gather_context_from_neighbors():
     agent = TestGraphAgent("TestAgent")
 
     # Partial spec missing WHO dimension
-    partial = W5H1(
+    partial = Chunk(
         subject="Payment",
         predicate="processes",
         object="transaction",
@@ -153,7 +153,7 @@ def test_graph_agent_gather_context_from_neighbors():
     )
 
     # Neighbor with WHO dimension
-    neighbor = W5H1(
+    neighbor = Chunk(
         subject="User",
         predicate="initiates",
         object="payment",
@@ -175,7 +175,7 @@ def test_graph_agent_gather_context_doesnt_override():
     agent = TestGraphAgent("TestAgent")
 
     # Node with WHO already set
-    node = W5H1(
+    node = Chunk(
         subject="Payment",
         predicate="processes",
         object="transaction",
@@ -186,7 +186,7 @@ def test_graph_agent_gather_context_doesnt_override():
     )
 
     # Neighbor with different WHO
-    neighbor = W5H1(
+    neighbor = Chunk(
         subject="User",
         predicate="initiates",
         object="payment",
@@ -208,7 +208,7 @@ def test_graph_agent_gather_context_multiple_dimensions():
     agent = TestGraphAgent("TestAgent")
 
     # Node with only WHERE
-    node = W5H1(
+    node = Chunk(
         subject="Payment",
         predicate="processes",
         object="transaction",
@@ -218,7 +218,7 @@ def test_graph_agent_gather_context_multiple_dimensions():
     )
 
     # Neighbor with WHO
-    neighbor1 = W5H1(
+    neighbor1 = Chunk(
         subject="User",
         predicate="initiates",
         object="payment",
@@ -229,7 +229,7 @@ def test_graph_agent_gather_context_multiple_dimensions():
     )
 
     # Neighbor with WHEN
-    neighbor2 = W5H1(
+    neighbor2 = Chunk(
         subject="System",
         predicate="logs",
         object="event",
@@ -252,8 +252,8 @@ def test_graph_agent_visited_tracking():
     """Test that visited nodes are tracked correctly."""
     agent = TestGraphAgent("TestAgent")
 
-    spec1 = W5H1("A", "does", "X", dimensions={Dimension.WHAT: "a"})
-    spec2 = W5H1("B", "does", "Y", dimensions={Dimension.WHAT: "b"})
+    spec1 = Chunk("A", "does", "X", dimensions={Dimension.WHAT: "a"})
+    spec2 = Chunk("B", "does", "Y", dimensions={Dimension.WHAT: "b"})
 
     # Execute first spec
     agent.execute(spec1)
@@ -275,8 +275,8 @@ def test_graph_agent_neighbors_list():
     """Test that neighbors list can be populated and used."""
     agent = TestGraphAgent("TestAgent")
 
-    spec1 = W5H1("A", "does", "X", dimensions={Dimension.WHERE: "place"})
-    spec2 = W5H1("B", "does", "Y", dimensions={Dimension.WHERE: "place"})
+    spec1 = Chunk("A", "does", "X", dimensions={Dimension.WHERE: "place"})
+    spec2 = Chunk("B", "does", "Y", dimensions={Dimension.WHERE: "place"})
 
     # Set neighbors
     agent.neighbors = [spec1, spec2]
@@ -290,14 +290,14 @@ def test_graph_agent_find_neighbors_no_match():
     """Test find_neighbors returns empty list when no neighbors match."""
     agent = TestGraphAgent("TestAgent")
 
-    node = W5H1(
+    node = Chunk(
         subject="Isolated",
         predicate="has",
         object="nothing",
         dimensions={Dimension.WHERE: "nowhere"}
     )
 
-    other = W5H1(
+    other = Chunk(
         subject="Other",
         predicate="is",
         object="elsewhere",
@@ -315,14 +315,14 @@ def test_graph_agent_is_same_system_relationship():
     agent = TestGraphAgent("TestAgent")
 
     # Two nodes that share a dimension are in same system
-    node1 = W5H1(
+    node1 = Chunk(
         subject="Service",
         predicate="processes",
         object="data",
         dimensions={Dimension.WHERE: "backend"}
     )
 
-    node2 = W5H1(
+    node2 = Chunk(
         subject="API",
         predicate="exposes",
         object="endpoint",

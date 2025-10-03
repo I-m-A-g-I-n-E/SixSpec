@@ -4,7 +4,7 @@ Dimensional specification framework for making Git history queryable and self-do
 
 ## Overview
 
-SixSpec implements dimensional commit messages based on the W5H1 framework (Who, What, When, Where, How, Why). This makes your Git history a queryable dimensional graph that both humans and AI agents can reason about.
+SixSpec implements dimensional commit messages based on the 5W1H framework (Who, What, When, Where, How, Why). This makes your Git history a queryable dimensional graph that both humans and AI agents can reason about.
 
 ## Key Features
 
@@ -172,14 +172,14 @@ Dimension.HOW   # Technical approach
 Dimension.WHY   # Purpose, business value
 ```
 
-### W5H1Object
+### Chunk
 
 Base class for dimensional objects with subject-predicate-object structure.
 
 ```python
-from sixspec.core import W5H1Object, Dimension
+from sixspec.core import Chunk, Dimension
 
-obj = W5H1Object(
+obj = Chunk(
     subject="developer",
     predicate="implements",
     object="feature",
@@ -196,14 +196,14 @@ if obj.has(Dimension.WHY):
 optional = obj.get(Dimension.WHO, default="unknown")  # Safe with default
 ```
 
-### CommitW5H1
+### CommitChunk
 
-Specialized W5H1Object for Git commits. Requires WHY and HOW dimensions.
+Specialized Chunk for Git commits. Requires WHY and HOW dimensions.
 
 ```python
-from sixspec.core import CommitW5H1, Dimension
+from sixspec.core import CommitChunk, Dimension
 
-commit = CommitW5H1(
+commit = CommitChunk(
     subject="fix",
     predicate="changes",
     object="payment timeout",
@@ -257,7 +257,7 @@ pytest --cov=sixspec tests/
 ```
 sixspec/
   __init__.py
-  core.py              # W5H1Object, Dimension, CommitW5H1
+  core.py              # Chunk, Dimension, CommitChunk
   git/
     __init__.py
     parser.py          # CommitMessageParser
@@ -309,7 +309,7 @@ This makes Git history a dimensional graph that captures not just changes, but c
 ## Development Status
 
 **Phase 1**: ✅ Complete
-- Core data structures (W5H1Object, Dimension, CommitW5H1)
+- Core data structures (Chunk, Dimension, CommitChunk)
 - Commit message parser
 - Git hook validation
 - Dimensional history queries
@@ -338,4 +338,4 @@ This is part of the SixSpec framework. See the main SixSpec documentation for co
 ## Related
 
 - Linear Issue: [IMA-84](https://linear.app/imajn/issue/IMA-84/implement-dimensional-commit-message-format-and-git-hooks)
-- Depends on: [IMA-75](https://linear.app/imajn/issue/IMA-75/implement-core-w5h1object-data-structures) (CommitW5H1 class)
+- Depends on: [IMA-75](https://linear.app/imajn/issue/IMA-75/implement-core-w5h1object-data-structures) (CommitChunk class)

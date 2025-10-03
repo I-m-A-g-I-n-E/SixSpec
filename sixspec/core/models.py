@@ -2,24 +2,24 @@
 Core data structures for the SixSpec framework.
 
 This module implements the fundamental building blocks for six-dimensional
-specifications using the W5H1 model (WHO, WHAT, WHEN, WHERE, HOW, WHY)
+specifications using the 5W1H model (Who, What, When, Where, Why, How)
 combined with Dilts' Logical Levels.
 
 Key Concepts:
-    - Dimension: The six dimensions of specification
+    - Dimension: The six dimensions of specification (5W1H)
     - DiltsLevel: Hierarchical levels from Environment to Mission
-    - W5H1: Universal container for dimensional specifications
+    - Chunk: Universal container for dimensional specifications
     - Purpose Propagation: Parent's WHAT becomes child's WHY
 
 Example:
-    >>> from sixspec.core.models import W5H1, Dimension
-    >>> parent = W5H1(
+    >>> from sixspec.core.models import Chunk, Dimension
+    >>> parent = Chunk(
     ...     subject="System",
     ...     predicate="needs",
     ...     object="billing",
     ...     dimensions={Dimension.WHAT: "Build billing system"}
     ... )
-    >>> child = W5H1(
+    >>> child = Chunk(
     ...     subject="Developer",
     ...     predicate="integrates",
     ...     object="Stripe",
@@ -40,7 +40,7 @@ from typing import Any, Dict, Optional, Set
 
 class Dimension(Enum):
     """
-    The six dimensions of specification (W5H1 model).
+    The six dimensions of specification (5W1H model).
 
     These dimensions provide a complete framework for describing any
     specification, action, or context:
@@ -48,8 +48,8 @@ class Dimension(Enum):
     - WHAT: Actions, objects, results
     - WHEN: Temporal context, timing
     - WHERE: Spatial context, location
-    - HOW: Methods, processes, implementation
     - WHY: Purpose, motivation, goals
+    - HOW: Methods, processes, implementation
     """
     WHO = "who"
     WHAT = "what"
@@ -138,11 +138,11 @@ D = Dimension # convenience alias
 
 
 @dataclass
-class W5H1:
+class Chunk:
     """
-    Six-dimensional specification object (W5H1 model).
+    Six-dimensional specification object (5W1H model).
 
-    W5H1 is the universal container for specifications, combining:
+    Chunk is the universal container for specifications, combining:
     - Subject-predicate-object triple (RDF-style)
     - Six dimensions (WHO/WHAT/WHEN/WHERE/HOW/WHY)
     - Per-dimension confidence scores
@@ -163,7 +163,7 @@ class W5H1:
         level: Optional Dilts level assignment
 
     Example:
-        >>> spec = W5H1(
+        >>> spec = Chunk(
         ...     subject="User",
         ...     predicate="wants",
         ...     object="feature"
@@ -209,11 +209,11 @@ class W5H1:
             The dimension value if set, None otherwise
 
         Example:
-            >>> parent = W5H1(
+            >>> parent = Chunk(
             ...     subject="System", predicate="needs", object="billing",
             ...     dimensions={Dimension.WHAT: "Build billing system"}
             ... )
-            >>> child = W5H1(
+            >>> child = Chunk(
             ...     subject="Dev", predicate="codes", object="integration",
             ...     dimensions={Dimension.WHY: parent.need(Dimension.WHAT)}
             ... )
@@ -235,7 +235,7 @@ class W5H1:
             ValueError: If confidence is not in range [0.0, 1.0]
 
         Example:
-            >>> spec = W5H1(subject="A", predicate="B", object="C")
+            >>> spec = Chunk(subject="A", predicate="B", object="C")
             >>> spec.set(Dimension.WHO, "Users", confidence=0.8)
         """
         if not 0.0 <= confidence <= 1.0:
@@ -255,25 +255,25 @@ class W5H1:
         """
         return self.confidence.get(dim, 0.0)
 
-    def shared_dimensions(self, other: 'W5H1') -> Set[Dimension]:
+    def shared_dimensions(self, other: 'Chunk') -> Set[Dimension]:
         """
-        Find dimensions shared with another W5H1 object.
+        Find dimensions shared with another Chunk object.
 
         Two dimensions are "shared" if both objects have them set,
         regardless of whether the values are identical.
 
         Args:
-            other: Another W5H1 object to compare with
+            other: Another Chunk object to compare with
 
         Returns:
             Set of dimensions present in both objects
 
         Example:
-            >>> spec1 = W5H1("A", "B", "C", dimensions={
+            >>> spec1 = Chunk("A", "B", "C", dimensions={
             ...     Dimension.WHERE: "store",
             ...     Dimension.WHEN: "today"
             ... })
-            >>> spec2 = W5H1("D", "E", "F", dimensions={
+            >>> spec2 = Chunk("D", "E", "F", dimensions={
             ...     Dimension.WHERE: "store",
             ...     Dimension.WHO: "user"
             ... })
@@ -282,7 +282,7 @@ class W5H1:
         """
         return set(self.dimensions.keys()) & set(other.dimensions.keys())
 
-    def is_same_system(self, other: 'W5H1') -> bool:
+    def is_same_system(self, other: 'Chunk') -> bool:
         """
         Check if two objects belong to the same system.
 
@@ -293,19 +293,19 @@ class W5H1:
         overlap, not requiring complete alignment.
 
         Args:
-            other: Another W5H1 object to compare with
+            other: Another Chunk object to compare with
 
         Returns:
             True if objects share ≥1 dimension, False otherwise
 
         Example:
-            >>> milk = W5H1("User", "buys", "milk", dimensions={
+            >>> milk = Chunk("User", "buys", "milk", dimensions={
             ...     Dimension.WHERE: "grocery store"
             ... })
-            >>> bread = W5H1("User", "buys", "bread", dimensions={
+            >>> bread = Chunk("User", "buys", "bread", dimensions={
             ...     Dimension.WHERE: "grocery store"
             ... })
-            >>> hammer = W5H1("User", "buys", "hammer", dimensions={
+            >>> hammer = Chunk("User", "buys", "hammer", dimensions={
             ...     Dimension.WHERE: "hardware store"
             ... })
             >>> milk.is_same_system(bread)  # Same store
@@ -315,7 +315,7 @@ class W5H1:
         """
         return len(self.shared_dimensions(other)) >= 1
 
-    def copy_with(self, **updates) -> 'W5H1':
+    def copy_with(self, **updates) -> 'Chunk':
         """
         Create a copy with specified updates.
 
@@ -326,10 +326,10 @@ class W5H1:
             **updates: Keyword arguments for attributes to update
 
         Returns:
-            New W5H1 instance with updates applied
+            New Chunk instance with updates applied
 
         Example:
-            >>> original = W5H1("A", "B", "C", dimensions={
+            >>> original = Chunk("A", "B", "C", dimensions={
             ...     Dimension.WHO: "user"
             ... })
             >>> variant = original.copy_with(
@@ -349,7 +349,7 @@ class W5H1:
         if 'confidence' in updates:
             new_confidence = updates.pop('confidence')
 
-        return W5H1(
+        return Chunk(
             subject=updates.get('subject', self.subject),
             predicate=updates.get('predicate', self.predicate),
             object=updates.get('object', self.object),
@@ -362,7 +362,7 @@ class W5H1:
         """
         Get the set of required dimensions for this object.
 
-        Base W5H1 has no strict requirements - subclasses can override
+        Base Chunk has no strict requirements - subclasses can override
         to enforce specific dimensional requirements.
 
         Returns:
@@ -378,7 +378,7 @@ class W5H1:
             True if all required dimensions are present, False otherwise
 
         Example:
-            >>> spec = SpecW5H1("A", "B", "C")
+            >>> spec = SpecChunk("A", "B", "C")
             >>> spec.is_complete()
             False
             >>> spec.set(Dimension.WHO, "user")
@@ -398,7 +398,7 @@ class W5H1:
             Dictionary representation suitable for JSON serialization
 
         Example:
-            >>> spec = W5H1("A", "B", "C", dimensions={
+            >>> spec = Chunk("A", "B", "C", dimensions={
             ...     Dimension.WHO: "user"
             ... })
             >>> spec.to_dict()
@@ -414,7 +414,7 @@ class W5H1:
         }
 
     @classmethod
-    def from_dict(cls, data: dict) -> 'W5H1':
+    def from_dict(cls, data: dict) -> 'Chunk':
         """
         Deserialize from dictionary format.
 
@@ -422,7 +422,7 @@ class W5H1:
             data: Dictionary representation (from to_dict())
 
         Returns:
-            New W5H1 instance reconstructed from dictionary
+            New Chunk instance reconstructed from dictionary
 
         Example:
             >>> data = {
@@ -431,7 +431,7 @@ class W5H1:
             ...     'confidence': {'who': 0.9},
             ...     'level': None
             ... }
-            >>> spec = W5H1.from_dict(data)
+            >>> spec = Chunk.from_dict(data)
             >>> spec.need(Dimension.WHO)
             'user'
         """
@@ -453,9 +453,9 @@ class W5H1:
         )
 
 
-class CommitW5H1(W5H1):
+class CommitChunk(Chunk):
     """
-    Specialized W5H1 for git commits.
+    Specialized Chunk for git commits.
 
     Git commits require dimensional documentation to create
     self-documenting version history:
@@ -463,7 +463,7 @@ class CommitW5H1(W5H1):
     - HOW: Implementation approach
 
     Example:
-        >>> commit = CommitW5H1(
+        >>> commit = CommitChunk(
         ...     subject="Developer",
         ...     predicate="implements",
         ...     object="feature",
@@ -481,9 +481,9 @@ class CommitW5H1(W5H1):
         return {Dimension.WHY, Dimension.HOW}
 
 
-class SpecW5H1(W5H1):
+class SpecChunk(Chunk):
     """
-    Specialized W5H1 for full specifications.
+    Specialized Chunk for full specifications.
 
     Full specifications should identify the actors, actions, and
     purpose at minimum:
@@ -492,7 +492,7 @@ class SpecW5H1(W5H1):
     - WHY: Purpose and motivation
 
     Example:
-        >>> spec = SpecW5H1(
+        >>> spec = SpecChunk(
         ...     subject="System",
         ...     predicate="provides",
         ...     object="authentication",
@@ -517,7 +517,7 @@ class BaseActor(ABC):
 
     Actors are entities that can process and execute specifications.
     They maintain dimensional context and can understand and execute
-    W5H1 specifications.
+    Chunk specifications.
 
     Three types of actors will implement this interface:
     - Human actors: Manual execution with dimensional awareness
@@ -535,7 +535,7 @@ class BaseActor(ABC):
         ...     def execute(self, spec):
         ...         return f"Executing: {spec.need(Dimension.WHAT)}"
         >>> actor = SimpleActor("TestActor")
-        >>> spec = W5H1("A", "B", "C", dimensions={
+        >>> spec = Chunk("A", "B", "C", dimensions={
         ...     Dimension.WHAT: "task"
         ... })
         >>> actor.understand(spec)
@@ -555,7 +555,7 @@ class BaseActor(ABC):
         self.context: Dict[Dimension, Any] = {}
 
     @abstractmethod
-    def understand(self, spec: W5H1) -> bool:
+    def understand(self, spec: Chunk) -> bool:
         """
         Check if this actor can process the given specification.
 
@@ -563,7 +563,7 @@ class BaseActor(ABC):
         if they have the capability to execute it.
 
         Args:
-            spec: W5H1 specification to evaluate
+            spec: Chunk specification to evaluate
 
         Returns:
             True if actor can process this spec, False otherwise
@@ -571,7 +571,7 @@ class BaseActor(ABC):
         pass
 
     @abstractmethod
-    def execute(self, spec: W5H1) -> Any:
+    def execute(self, spec: Chunk) -> Any:
         """
         Execute based on specification.
 
@@ -579,7 +579,7 @@ class BaseActor(ABC):
         The return value depends on the actor type and specification.
 
         Args:
-            spec: W5H1 specification to execute
+            spec: Chunk specification to execute
 
         Returns:
             Result of execution (type varies by actor and spec)

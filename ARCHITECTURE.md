@@ -2,7 +2,7 @@
 
 ## Overview
 
-SixSpec is a hierarchical specification framework that combines the W5H1 dimensional model with Dilts' Logical Levels to create self-documenting, traceable, and queryable systems. This document explains how all the pieces fit together.
+SixSpec is a hierarchical specification framework that combines the 5W1H dimensional model with Dilts' Logical Levels to create self-documenting, traceable, and queryable systems. This document explains how all the pieces fit together.
 
 ## Core Architecture Principle
 
@@ -37,7 +37,7 @@ This simple rule creates:
                    ↓
 ┌─────────────────────────────────────────┐
 │         Core Layer                       │
-│  - W5H1 (dimensional specs)             │
+│  - Chunk (dimensional specs)             │
 │  - Dimension enum                       │
 │  - DiltsLevel enum                      │
 │  - BaseActor interface                  │
@@ -83,13 +83,13 @@ Each level has:
 - **Primary dimensions**: Which dimensions it naturally emphasizes
 - **Delegation pattern**: How it creates child specifications
 
-#### W5H1 Class
+#### Chunk Class
 
 Universal container for dimensional specifications:
 
 ```python
 @dataclass
-class W5H1:
+class 5W1H:
     subject: str                              # Who/what is acting
     predicate: str                            # Relationship/action
     object: str                               # Target/result
@@ -102,15 +102,15 @@ class W5H1:
 - `has(dim)`: Check if dimension is set
 - `need(dim)`: Demand-driven dimension fetch (enables lazy evaluation)
 - `set(dim, value, confidence)`: Set dimension with confidence score
-- `shared_dimensions(other)`: Find overlap with another W5H1
+- `shared_dimensions(other)`: Find overlap with another Chunk
 - `is_same_system(other)`: Grocery store rule (≥1 shared dimension)
 - `is_complete()`: Validate all required dimensions present
 - `copy_with(**updates)`: Immutable-style updates
 
 **Specialized Subclasses:**
 
-- **CommitW5H1**: Requires WHY + HOW (for Git commits)
-- **SpecW5H1**: Requires WHO + WHAT + WHY (for full specifications)
+- **CommitChunk**: Requires WHY + HOW (for Git commits)
+- **SpecChunk**: Requires WHO + WHAT + WHY (for full specifications)
 
 ### 2. Agent Layer (`sixspec/agents/`)
 
@@ -119,10 +119,10 @@ Agents are entities that understand and execute dimensional specifications.
 #### BaseActor (Abstract)
 ```python
 class BaseActor(ABC):
-    def understand(self, spec: W5H1) -> bool:
+    def understand(self, spec: Chunk) -> bool:
         """Can this actor process this spec?"""
 
-    def execute(self, spec: W5H1) -> Any:
+    def execute(self, spec: Chunk) -> Any:
         """Execute based on specification"""
 ```
 
@@ -142,11 +142,11 @@ class NodeAgent(BaseActor):
     def __init__(self, name: str, scope: str):
         self.scope = scope  # What kind of node?
 
-    def understand(self, spec: W5H1) -> bool:
+    def understand(self, spec: Chunk) -> bool:
         # Must have dimensions and be complete
         return len(spec.dimensions) > 0 and spec.is_complete()
 
-    def process_node(self, spec: W5H1) -> Any:
+    def process_node(self, spec: Chunk) -> Any:
         # Subclass implements specific logic
         pass
 ```
@@ -165,13 +165,13 @@ Traverses relationships and gathers context from neighbors.
 ```python
 class GraphAgent(BaseActor):
     def __init__(self, name: str):
-        self.current_node: Optional[W5H1] = None
+        self.current_node: Optional[Chunk] = None
         self.visited: Set[str] = set()
 
-    def traverse(self, start: W5H1) -> Any:
+    def traverse(self, start: Chunk) -> Any:
         """Navigate the graph starting from a node"""
 
-    def gather_context(self, spec: W5H1, depth: int) -> List[W5H1]:
+    def gather_context(self, spec: Chunk, depth: int) -> List[Chunk]:
         """Collect neighboring nodes for context"""
 ```
 
@@ -240,7 +240,7 @@ Level 1 (ENVIRONMENT)
 ```python
 # Level 3 walker generating multiple strategies
 walker = DiltsWalker(level=DiltsLevel.CAPABILITY)
-spec = W5H1(
+spec = Chunk(
     subject="System",
     predicate="needs",
     object="payment",
@@ -328,17 +328,17 @@ class Workspace:
 
 #### CommitMessageParser
 
-Parses dimensional commits into CommitW5H1 objects:
+Parses dimensional commits into CommitChunk objects:
 
 ```python
 class CommitMessageParser:
     @classmethod
-    def parse(cls, commit_msg: str, commit_hash: str = "") -> CommitW5H1:
-        """Parse commit message into CommitW5H1"""
+    def parse(cls, commit_msg: str, commit_hash: str = "") -> Commit5W1H:
+        """Parse commit message into CommitChunk"""
 
     @classmethod
     def parse_git_log(cls, repo_path: Path, n: Optional[int] = None,
-                     skip_invalid: bool = True) -> List[CommitW5H1]:
+                     skip_invalid: bool = True) -> List[CommitChunk]:
         """Parse recent commits from git log"""
 ```
 
@@ -359,14 +359,14 @@ Queryable commit history:
 class DimensionalGitHistory:
     def __init__(self, repo_path: Path):
         self.repo_path = repo_path
-        self.commits: List[CommitW5H1] = []
+        self.commits: List[CommitChunk] = []
         self._load_commits()
 
     def query(self, where: str = None, why: str = None,
-              commit_type: str = None, **kwargs) -> List[CommitW5H1]:
+              commit_type: str = None, **kwargs) -> List[CommitChunk]:
         """Query commits by any dimension"""
 
-    def trace_file_purpose(self, file_path: str) -> List[CommitW5H1]:
+    def trace_file_purpose(self, file_path: str) -> List[CommitChunk]:
         """Find all commits affecting a file"""
 
     def get_purposes(self) -> List[str]:
@@ -696,7 +696,7 @@ class LinterAgent(NodeAgent):
     def __init__(self):
         super().__init__("Linter", scope="code_file")
 
-    def process_node(self, spec: W5H1) -> Any:
+    def process_node(self, spec: Chunk) -> Any:
         file_path = spec.need(Dimension.WHERE)
         return run_linter(file_path)
 
@@ -705,7 +705,7 @@ class DependencyAgent(GraphAgent):
     def __init__(self):
         super().__init__("DependencyAnalyzer")
 
-    def traverse(self, start: W5H1) -> Any:
+    def traverse(self, start: Chunk) -> Any:
         context = self.gather_context(start, depth=2)
         return analyze_dependencies(context)
 ```
@@ -718,7 +718,7 @@ class TestingWalker(DiltsWalker):
     def __init__(self):
         super().__init__(level=DiltsLevel.CAPABILITY)
 
-    def generate_strategies(self, spec: W5H1, n: int) -> List[str]:
+    def generate_strategies(self, spec: Chunk, n: int) -> List[str]:
         base = spec.need(Dimension.WHAT)
         return [
             f"{base} with unit tests",
@@ -745,7 +745,7 @@ Git history uses lazy loading with caching:
 class DimensionalGitHistory:
     def __init__(self, repo_path: Path):
         self.repo_path = repo_path
-        self.commits: List[CommitW5H1] = []
+        self.commits: List[CommitChunk] = []
         self._loaded = False
 
     def _load_commits(self):
@@ -789,7 +789,7 @@ finally:
 ```
 tests/
 ├── core/
-│   └── test_models.py          # W5H1, Dimension, DiltsLevel
+│   └── test_models.py          # Chunk, Dimension, DiltsLevel
 ├── agents/
 │   ├── test_node_agent.py      # NodeAgent tests
 │   ├── test_graph_agent.py     # GraphAgent tests
@@ -855,7 +855,7 @@ tests/
 
 SixSpec's architecture is built on three core principles:
 
-1. **Dimensional Specifications**: W5H1 provides complete context
+1. **Dimensional Specifications**: Chunk provides complete context
 2. **Hierarchical Delegation**: Dilts levels organize autonomy
 3. **Purpose Propagation**: WHAT→WHY creates traceability
 

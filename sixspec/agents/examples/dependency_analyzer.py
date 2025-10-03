@@ -7,7 +7,7 @@ relationships between specifications to find dependencies.
 Example:
     >>> from sixspec.agents.examples import DependencyAnalyzer
     >>> analyzer = DependencyAnalyzer()
-    >>> spec = W5H1("Service", "depends", "library",
+    >>> spec = Chunk("Service", "depends", "library",
     ...     dimensions={Dimension.WHERE: "payment_service"})
     >>> analyzer.neighbors = [other_spec1, other_spec2]
     >>> dependencies = analyzer.traverse(spec)
@@ -15,7 +15,7 @@ Example:
 
 from typing import List
 from sixspec.agents.graph_agent import GraphAgent
-from sixspec.core.models import W5H1, Dimension
+from sixspec.core.models import Chunk, Dimension
 
 
 class DependencyAnalyzer(GraphAgent):
@@ -42,9 +42,9 @@ class DependencyAnalyzer(GraphAgent):
         >>> analyzer = DependencyAnalyzer()
         >>> analyzer.name
         'DependencyAnalyzer'
-        >>> spec1 = W5H1("Service", "calls", "API",
+        >>> spec1 = Chunk("Service", "calls", "API",
         ...     dimensions={Dimension.WHERE: "service_a"})
-        >>> spec2 = W5H1("Service", "uses", "Database",
+        >>> spec2 = Chunk("Service", "uses", "Database",
         ...     dimensions={Dimension.WHERE: "service_a"})
         >>> analyzer.neighbors = [spec2]
         >>> deps = analyzer.traverse(spec1)
@@ -61,7 +61,7 @@ class DependencyAnalyzer(GraphAgent):
         """
         super().__init__("DependencyAnalyzer")
 
-    def traverse(self, start: W5H1) -> List[W5H1]:
+    def traverse(self, start: Chunk) -> List[Chunk]:
         """
         Find all specs that depend on or are depended upon by this spec.
 
@@ -76,18 +76,18 @@ class DependencyAnalyzer(GraphAgent):
         4. Return list of dependency specs
 
         Args:
-            start: W5H1 specification to start dependency analysis from
+            start: Chunk specification to start dependency analysis from
 
         Returns:
-            List of W5H1 specs that have dependencies with the start spec
+            List of Chunk specs that have dependencies with the start spec
 
         Example:
             >>> analyzer = DependencyAnalyzer()
-            >>> service_spec = W5H1("Payment", "processes", "transaction",
+            >>> service_spec = Chunk("Payment", "processes", "transaction",
             ...     dimensions={Dimension.WHERE: "payment_service"})
-            >>> db_spec = W5H1("Database", "stores", "data",
+            >>> db_spec = Chunk("Database", "stores", "data",
             ...     dimensions={Dimension.WHERE: "payment_service"})
-            >>> api_spec = W5H1("API", "exposes", "endpoint",
+            >>> api_spec = Chunk("API", "exposes", "endpoint",
             ...     dimensions={Dimension.WHERE: "api_gateway"})
             >>> analyzer.neighbors = [db_spec, api_spec]
             >>> deps = analyzer.traverse(service_spec)

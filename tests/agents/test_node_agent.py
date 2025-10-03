@@ -10,13 +10,13 @@ These tests verify that NodeAgent correctly:
 
 import pytest
 from sixspec.agents.node_agent import NodeAgent
-from sixspec.core.models import W5H1, Dimension
+from sixspec.core.models import Chunk, Dimension
 
 
 class TestNodeAgent(NodeAgent):
     """Test implementation of NodeAgent for testing."""
 
-    def process_node(self, spec: W5H1) -> str:
+    def process_node(self, spec: Chunk) -> str:
         """Simple implementation that returns the subject."""
         return f"Processed: {spec.subject}"
 
@@ -34,7 +34,7 @@ def test_node_agent_understands_complete_spec():
     agent = TestNodeAgent("TestAgent", "test")
 
     # Complete spec with dimensions
-    complete = W5H1(
+    complete = Chunk(
         subject="File",
         predicate="contains",
         object="code",
@@ -51,7 +51,7 @@ def test_node_agent_rejects_incomplete_spec():
     agent = TestNodeAgent("TestAgent", "test")
 
     # Incomplete spec without required dimensions
-    incomplete = W5H1(
+    incomplete = Chunk(
         subject="File",
         predicate="contains",
         object="code",
@@ -64,7 +64,7 @@ def test_node_agent_execute_with_complete_spec():
     """Test NodeAgent execution with a complete spec."""
     agent = TestNodeAgent("TestAgent", "test")
 
-    complete = W5H1(
+    complete = Chunk(
         subject="TestSubject",
         predicate="does",
         object="thing",
@@ -81,7 +81,7 @@ def test_node_agent_execute_raises_on_incomplete_spec():
     """Test that NodeAgent raises ValueError for incomplete specs."""
     agent = TestNodeAgent("TestAgent", "test")
 
-    incomplete = W5H1(
+    incomplete = Chunk(
         subject="Incomplete",
         predicate="lacks",
         object="dimensions",
@@ -102,13 +102,13 @@ def test_node_agent_requires_process_node_implementation():
 
 
 def test_node_agent_with_spec_subclass():
-    """Test NodeAgent with SpecW5H1 that has required dimensions."""
-    from sixspec.core.models import SpecW5H1
+    """Test NodeAgent with SpecChunk that has required dimensions."""
+    from sixspec.core.models import SpecChunk
 
     agent = TestNodeAgent("TestAgent", "spec")
 
-    # SpecW5H1 requires WHO, WHAT, WHY
-    incomplete_spec = SpecW5H1(
+    # SpecChunk requires WHO, WHAT, WHY
+    incomplete_spec = SpecChunk(
         subject="System",
         predicate="provides",
         object="feature",
@@ -118,7 +118,7 @@ def test_node_agent_with_spec_subclass():
     )
     assert not agent.understand(incomplete_spec)
 
-    complete_spec = SpecW5H1(
+    complete_spec = SpecChunk(
         subject="System",
         predicate="provides",
         object="feature",
@@ -160,8 +160,8 @@ def test_node_agent_multiple_executions():
     """Test that NodeAgent can execute multiple times."""
     agent = TestNodeAgent("MultiAgent", "test")
 
-    spec1 = W5H1("First", "does", "thing", dimensions={Dimension.WHAT: "a"})
-    spec2 = W5H1("Second", "does", "thing", dimensions={Dimension.WHAT: "b"})
+    spec1 = Chunk("First", "does", "thing", dimensions={Dimension.WHAT: "a"})
+    spec2 = Chunk("Second", "does", "thing", dimensions={Dimension.WHAT: "b"})
 
     result1 = agent.execute(spec1)
     result2 = agent.execute(spec2)

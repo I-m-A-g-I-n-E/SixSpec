@@ -15,8 +15,8 @@
 **File**: `sixspec/core.py`
 
 - `Dimension` enum with all six dimensions (WHO, WHAT, WHEN, WHERE, HOW, WHY)
-- `W5H1Object` base class with subject-predicate-object structure
-- `CommitW5H1` specialized class for Git commits
+- `Chunk` base class with subject-predicate-object structure
+- `CommitChunk` specialized class for Git commits
 - Methods: `has()`, `need()`, `get()` for dimension access
 
 ### 2. Git Hook Validation ✅
@@ -44,7 +44,7 @@
 **File**: `sixspec/git/parser.py`
 
 - `CommitMessageParser` class
-- Parses individual commit messages into `CommitW5H1` objects
+- Parses individual commit messages into `CommitChunk` objects
 - Extracts all dimensions using regex
 - Validates required dimensions
 - `parse_git_log()` method to parse entire git history
@@ -77,7 +77,7 @@
 - Invalid subject line handling
 - Comment line filtering
 - Dimension access methods (has, need, get)
-- CommitW5H1 validation
+- CommitChunk validation
 
 #### History Tests (12 tests)
 - Loading commits from git repo
@@ -249,7 +249,7 @@ tests/git/test_parser.py::TestCommitMessageParser::test_commit_w5h1_validation P
 ### Parsing ✅
 - ✅ CommitMessageParser extracts all dimensions
 - ✅ Parser handles optional dimensions
-- ✅ Parser creates valid CommitW5H1 objects
+- ✅ Parser creates valid CommitChunk objects
 - ✅ Parser can process git log output
 
 ### Querying ✅
@@ -259,7 +259,7 @@ tests/git/test_parser.py::TestCommitMessageParser::test_commit_w5h1_validation P
 - ✅ Can trace file history with purpose
 
 ### Integration ✅
-- ✅ Works with CommitW5H1 (implemented in this issue)
+- ✅ Works with CommitChunk (implemented in this issue)
 - ✅ Can be used standalone (no other SixSpec components needed)
 - ✅ Easy to install in existing repos
 
@@ -270,7 +270,7 @@ tests/git/test_parser.py::TestCommitMessageParser::test_commit_w5h1_validation P
 ```
 sixspec/
 ├── __init__.py                    # Package initialization
-├── core.py                        # W5H1Object, Dimension, CommitW5H1
+├── core.py                        # Chunk, Dimension, CommitChunk
 └── git/
     ├── __init__.py               # Git module exports
     ├── parser.py                 # CommitMessageParser
@@ -340,7 +340,7 @@ README.md                         # Documentation
 
 ## Related Issues
 
-- **Depends on**: [IMA-75](https://linear.app/imajn/issue/IMA-75) - CommitW5H1 class (✅ implemented here)
+- **Depends on**: [IMA-75](https://linear.app/imajn/issue/IMA-75) - CommitChunk class (✅ implemented here)
 - **Linear Issue**: [IMA-84](https://linear.app/imajn/issue/IMA-84)
 
 ---

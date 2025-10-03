@@ -7,9 +7,9 @@ Complete API documentation for the SixSpec framework.
 - [Core Module](#core-module)
   - [Dimension](#dimension)
   - [DiltsLevel](#diltslevel)
-  - [W5H1](#w5h1)
-  - [CommitW5H1](#commitw5h1)
-  - [SpecW5H1](#specw5h1)
+  - [Chunk](#w5h1)
+  - [CommitChunk](#commitw5h1)
+  - [SpecChunk](#specw5h1)
   - [BaseActor](#baseactor)
 - [Agents Module](#agents-module)
   - [NodeAgent](#nodeagent)
@@ -39,7 +39,7 @@ Complete API documentation for the SixSpec framework.
 from sixspec.core import Dimension
 ```
 
-Enumeration of the six dimensions in the W5H1 model.
+Enumeration of the six dimensions in the 5W1H model.
 
 #### Values
 
@@ -126,10 +126,10 @@ print(level.autonomy)  # "extreme"
 
 ---
 
-### W5H1
+### Chunk
 
 ```python
-from sixspec.core import W5H1
+from sixspec.core import Chunk
 ```
 
 Universal container for six-dimensional specifications.
@@ -137,7 +137,7 @@ Universal container for six-dimensional specifications.
 #### Constructor
 
 ```python
-W5H1(
+Chunk(
     subject: str,
     predicate: str,
     object: str,
@@ -157,7 +157,7 @@ W5H1(
 
 **Example:**
 ```python
-spec = W5H1(
+spec = Chunk(
     subject="User",
     predicate="wants",
     object="feature",
@@ -238,42 +238,42 @@ if confidence < 0.5:
     print("Low confidence, needs validation")
 ```
 
-##### `shared_dimensions(other: W5H1) -> Set[Dimension]`
+##### `shared_dimensions(other: Chunk) -> Set[Dimension]`
 
-Find dimensions shared with another W5H1 object.
+Find dimensions shared with another Chunk object.
 
 **Parameters:**
-- `other`: Another W5H1 object to compare with
+- `other`: Another Chunk object to compare with
 
 **Returns:**
 - `Set[Dimension]`: Set of dimensions present in both objects
 
 **Example:**
 ```python
-spec1 = W5H1("A", "B", "C", dimensions={Dimension.WHERE: "store"})
-spec2 = W5H1("D", "E", "F", dimensions={Dimension.WHERE: "store"})
+spec1 = Chunk("A", "B", "C", dimensions={Dimension.WHERE: "store"})
+spec2 = Chunk("D", "E", "F", dimensions={Dimension.WHERE: "store"})
 shared = spec1.shared_dimensions(spec2)
 print(shared)  # {<Dimension.WHERE: 'where'>}
 ```
 
-##### `is_same_system(other: W5H1) -> bool`
+##### `is_same_system(other: Chunk) -> bool`
 
 Check if two objects belong to the same system (grocery store rule).
 
 **Parameters:**
-- `other`: Another W5H1 object to compare with
+- `other`: Another Chunk object to compare with
 
 **Returns:**
 - `bool`: True if objects share ≥1 dimension, False otherwise
 
 **Example:**
 ```python
-milk = W5H1("User", "buys", "milk", dimensions={Dimension.WHERE: "store"})
-bread = W5H1("User", "buys", "bread", dimensions={Dimension.WHERE: "store"})
+milk = Chunk("User", "buys", "milk", dimensions={Dimension.WHERE: "store"})
+bread = Chunk("User", "buys", "bread", dimensions={Dimension.WHERE: "store"})
 print(milk.is_same_system(bread))  # True
 ```
 
-##### `copy_with(**updates) -> W5H1`
+##### `copy_with(**updates) -> Chunk`
 
 Create a copy with specified updates (immutable-style).
 
@@ -281,11 +281,11 @@ Create a copy with specified updates (immutable-style).
 - `**updates`: Keyword arguments for attributes to update
 
 **Returns:**
-- `W5H1`: New W5H1 instance with updates applied
+- `Chunk`: New Chunk instance with updates applied
 
 **Example:**
 ```python
-original = W5H1("A", "B", "C", dimensions={Dimension.WHO: "user"})
+original = Chunk("A", "B", "C", dimensions={Dimension.WHO: "user"})
 variant = original.copy_with(
     object="D",
     dimensions={Dimension.WHO: "admin"}
@@ -301,7 +301,7 @@ Get the set of required dimensions for this object.
 
 **Example:**
 ```python
-spec = W5H1("A", "B", "C")
+spec = Chunk("A", "B", "C")
 print(spec.required_dimensions())  # set()
 ```
 
@@ -314,7 +314,7 @@ Check if all required dimensions are set.
 
 **Example:**
 ```python
-spec = SpecW5H1("A", "B", "C")
+spec = SpecChunk("A", "B", "C")
 print(spec.is_complete())  # False (missing WHO, WHAT, WHY)
 
 spec.set(Dimension.WHO, "user")
@@ -332,11 +332,11 @@ Serialize to dictionary format.
 
 **Example:**
 ```python
-spec = W5H1("A", "B", "C", dimensions={Dimension.WHO: "user"})
+spec = Chunk("A", "B", "C", dimensions={Dimension.WHO: "user"})
 data = spec.to_dict()
 ```
 
-##### `from_dict(data: dict) -> W5H1`
+##### `from_dict(data: dict) -> Chunk`
 
 Deserialize from dictionary format (class method).
 
@@ -344,7 +344,7 @@ Deserialize from dictionary format (class method).
 - `data`: Dictionary representation (from to_dict())
 
 **Returns:**
-- `W5H1`: New W5H1 instance reconstructed from dictionary
+- `Chunk`: New Chunk instance reconstructed from dictionary
 
 **Example:**
 ```python
@@ -354,20 +354,20 @@ data = {
     'confidence': {'who': 0.9},
     'level': None
 }
-spec = W5H1.from_dict(data)
+spec = Chunk.from_dict(data)
 ```
 
 ---
 
-### CommitW5H1
+### CommitChunk
 
 ```python
-from sixspec.core import CommitW5H1
+from sixspec.core import CommitChunk
 ```
 
-Specialized W5H1 for Git commits (requires WHY + HOW).
+Specialized Chunk for Git commits (requires WHY + HOW).
 
-Inherits all methods from [W5H1](#w5h1).
+Inherits all methods from [Chunk](#w5h1).
 
 #### Required Dimensions
 
@@ -379,7 +379,7 @@ def required_dimensions(self) -> Set[Dimension]:
 #### Example
 
 ```python
-commit = CommitW5H1(
+commit = CommitChunk(
     subject="fix",
     predicate="resolves",
     object="timeout issue",
@@ -393,15 +393,15 @@ print(commit.is_complete())  # True
 
 ---
 
-### SpecW5H1
+### SpecChunk
 
 ```python
-from sixspec.core import SpecW5H1
+from sixspec.core import SpecChunk
 ```
 
-Specialized W5H1 for full specifications (requires WHO + WHAT + WHY).
+Specialized Chunk for full specifications (requires WHO + WHAT + WHY).
 
-Inherits all methods from [W5H1](#w5h1).
+Inherits all methods from [Chunk](#w5h1).
 
 #### Required Dimensions
 
@@ -413,7 +413,7 @@ def required_dimensions(self) -> Set[Dimension]:
 #### Example
 
 ```python
-spec = SpecW5H1(
+spec = SpecChunk(
     subject="System",
     predicate="provides",
     object="authentication",
@@ -452,24 +452,24 @@ BaseActor(name: str)
 
 #### Abstract Methods
 
-##### `understand(spec: W5H1) -> bool`
+##### `understand(spec: Chunk) -> bool`
 
 Check if this actor can process the given specification.
 
 **Parameters:**
-- `spec`: W5H1 specification to evaluate
+- `spec`: Chunk specification to evaluate
 
 **Returns:**
 - `bool`: True if actor can process this spec, False otherwise
 
 **Must be implemented by subclasses.**
 
-##### `execute(spec: W5H1) -> Any`
+##### `execute(spec: Chunk) -> Any`
 
 Execute based on specification.
 
 **Parameters:**
-- `spec`: W5H1 specification to execute
+- `spec`: Chunk specification to execute
 
 **Returns:**
 - `Any`: Result of execution (type varies by actor and spec)
@@ -480,10 +480,10 @@ Execute based on specification.
 
 ```python
 class SimpleActor(BaseActor):
-    def understand(self, spec: W5H1) -> bool:
+    def understand(self, spec: Chunk) -> bool:
         return spec.has(Dimension.WHAT)
 
-    def execute(self, spec: W5H1) -> str:
+    def execute(self, spec: Chunk) -> str:
         return f"Executing: {spec.need(Dimension.WHAT)}"
 
 actor = SimpleActor("TestActor")
@@ -521,12 +521,12 @@ NodeAgent(name: str, scope: str)
 
 #### Methods
 
-##### `understand(spec: W5H1) -> bool`
+##### `understand(spec: Chunk) -> bool`
 
 Check if this agent can process the given specification.
 
 **Parameters:**
-- `spec`: W5H1 specification to evaluate
+- `spec`: Chunk specification to evaluate
 
 **Returns:**
 - `bool`: True if spec is complete with dimensions, False otherwise
@@ -534,16 +534,16 @@ Check if this agent can process the given specification.
 **Example:**
 ```python
 agent = NodeAgent("TestAgent", "test")
-complete = W5H1("A", "B", "C", dimensions={Dimension.WHO: "user"})
+complete = Chunk("A", "B", "C", dimensions={Dimension.WHO: "user"})
 print(agent.understand(complete))  # True
 ```
 
-##### `execute(spec: W5H1) -> Any`
+##### `execute(spec: Chunk) -> Any`
 
 Execute operation on this single node.
 
 **Parameters:**
-- `spec`: W5H1 specification to execute
+- `spec`: Chunk specification to execute
 
 **Returns:**
 - `Any`: Result from process_node() method
@@ -558,16 +558,16 @@ class EchoAgent(NodeAgent):
         return spec.subject
 
 agent = EchoAgent("Echo", "test")
-spec = W5H1("Hello", "says", "world")
+spec = Chunk("Hello", "says", "world")
 result = agent.execute(spec)  # Returns "Hello"
 ```
 
-##### `process_node(spec: W5H1) -> Any`
+##### `process_node(spec: Chunk) -> Any`
 
 Process a single node specification (abstract method).
 
 **Parameters:**
-- `spec`: Complete W5H1 specification to process
+- `spec`: Complete Chunk specification to process
 
 **Returns:**
 - `Any`: Result of processing (type varies by implementation)
@@ -605,54 +605,54 @@ GraphAgent(name: str)
 #### Attributes
 
 - `name` (str): Identifier for this agent
-- `current_node` (Optional[W5H1]): Current node being processed
+- `current_node` (Optional[Chunk]): Current node being processed
 - `visited` (Set[str]): Set of visited node identifiers
 - `context` (Dict[Dimension, Any]): Dimensional context
 
 #### Methods
 
-##### `understand(spec: W5H1) -> bool`
+##### `understand(spec: Chunk) -> bool`
 
 Check if this agent can process the given specification.
 
 **Parameters:**
-- `spec`: W5H1 specification to evaluate
+- `spec`: Chunk specification to evaluate
 
 **Returns:**
 - `bool`: True if spec has any dimensions, False otherwise
 
-##### `execute(spec: W5H1) -> Any`
+##### `execute(spec: Chunk) -> Any`
 
 Execute operation with graph traversal.
 
 **Parameters:**
-- `spec`: W5H1 specification to execute
+- `spec`: Chunk specification to execute
 
 **Returns:**
 - `Any`: Result from traverse() method
 
-##### `traverse(start: W5H1) -> Any`
+##### `traverse(start: Chunk) -> Any`
 
 Navigate the graph starting from a node (abstract method).
 
 **Parameters:**
-- `start`: Starting W5H1 node
+- `start`: Starting Chunk node
 
 **Returns:**
 - `Any`: Result of traversal
 
 **Must be implemented by subclasses.**
 
-##### `gather_context(spec: W5H1, depth: int = 1) -> List[W5H1]`
+##### `gather_context(spec: Chunk, depth: int = 1) -> List[Chunk]`
 
 Collect neighboring nodes for context.
 
 **Parameters:**
-- `spec`: Starting W5H1 node
+- `spec`: Starting Chunk node
 - `depth`: How many hops to traverse (default: 1)
 
 **Returns:**
-- `List[W5H1]`: List of neighboring nodes
+- `List[Chunk]`: List of neighboring nodes
 
 **Example:**
 ```python
@@ -695,7 +695,7 @@ DiltsWalker(level: DiltsLevel, parent: Optional['DiltsWalker'] = None)
 - `parent` (Optional[DiltsWalker]): Parent walker
 - `children` (List[DiltsWalker]): List of child walkers spawned
 - `workspace` (Optional[Workspace]): Isolated workspace for execution
-- `current_node` (Optional[W5H1]): Current node being processed
+- `current_node` (Optional[Chunk]): Current node being processed
 - `context` (Dict[Dimension, Any]): Dimensional context (includes inherited WHY)
 
 #### Methods
@@ -714,12 +714,12 @@ walker = DiltsWalker(level=DiltsLevel.CAPABILITY)
 walker.add_context(Dimension.WHY, "Build feature")
 ```
 
-##### `traverse(start: W5H1) -> Any`
+##### `traverse(start: Chunk) -> Any`
 
 Traverse down the Dilts hierarchy with WHAT→WHY propagation.
 
 **Parameters:**
-- `start`: W5H1 specification to execute
+- `start`: Chunk specification to execute
 
 **Returns:**
 - `Any`: Result from ground action or child execution
@@ -727,12 +727,12 @@ Traverse down the Dilts hierarchy with WHAT→WHY propagation.
 **Example:**
 ```python
 walker = DiltsWalker(level=DiltsLevel.CAPABILITY)
-spec = W5H1("System", "needs", "feature",
+spec = Chunk("System", "needs", "feature",
            dimensions={Dimension.WHAT: "Integrate payment"})
 result = walker.traverse(spec)
 ```
 
-##### `spawn_children(n_strategies: int, base_spec: W5H1) -> List[Tuple[DiltsWalker, W5H1]]`
+##### `spawn_children(n_strategies: int, base_spec: Chunk) -> List[Tuple[DiltsWalker, Chunk]]`
 
 Spawn multiple children exploring different approaches.
 
@@ -741,17 +741,17 @@ Spawn multiple children exploring different approaches.
 - `base_spec`: Base specification for children
 
 **Returns:**
-- `List[Tuple[DiltsWalker, W5H1]]`: List of (child_walker, child_spec) tuples
+- `List[Tuple[DiltsWalker, Chunk]]`: List of (child_walker, child_spec) tuples
 
 **Example:**
 ```python
 walker = DiltsWalker(level=DiltsLevel.CAPABILITY)
-spec = W5H1("System", "needs", "payment",
+spec = Chunk("System", "needs", "payment",
            dimensions={Dimension.WHAT: "Integrate payment"})
 children = walker.spawn_children(3, spec)  # 3 different strategies
 ```
 
-##### `execute_portfolio(spec: W5H1, n_strategies: int = 3) -> Any`
+##### `execute_portfolio(spec: Chunk, n_strategies: int = 3) -> Any`
 
 Execute multiple strategies in parallel and pick winner.
 
@@ -768,7 +768,7 @@ Execute multiple strategies in parallel and pick winner.
 **Example:**
 ```python
 walker = DiltsWalker(level=DiltsLevel.CAPABILITY)
-spec = W5H1("System", "needs", "payment",
+spec = Chunk("System", "needs", "payment",
            dimensions={
                Dimension.WHAT: "Integrate payment",
                Dimension.WHY: "Launch premium"
@@ -789,7 +789,7 @@ chain = walker.trace_provenance()
 # Returns: ["Increase revenue", "Launch premium", "Build payment", ...]
 ```
 
-##### `execute_ground_action(spec: W5H1) -> str`
+##### `execute_ground_action(spec: Chunk) -> str`
 
 Level 1: Actually execute the specified action.
 
@@ -802,7 +802,7 @@ Level 1: Actually execute the specified action.
 **Example:**
 ```python
 walker = DiltsWalker(level=DiltsLevel.ENVIRONMENT)
-spec = W5H1("System", "executes", "action",
+spec = Chunk("System", "executes", "action",
            dimensions={
                Dimension.WHAT: "Run tests",
                Dimension.WHY: "Verify implementation"
@@ -811,7 +811,7 @@ result = walker.execute_ground_action(spec)
 # Returns: "EXECUTED: Run tests (because: Verify implementation)"
 ```
 
-##### `generate_strategies(spec: W5H1, n: int) -> List[str]`
+##### `generate_strategies(spec: Chunk, n: int) -> List[str]`
 
 Generate n different strategies for achieving the goal.
 
@@ -1052,7 +1052,7 @@ Automatically sets level to `DiltsLevel.MISSION`.
 
 ```python
 walker = MissionWalker()
-spec = W5H1(
+spec = Chunk(
     subject="Company",
     predicate="aims",
     object="growth",
@@ -1085,7 +1085,7 @@ Automatically sets level to `DiltsLevel.CAPABILITY`.
 
 ```python
 walker = CapabilityWalker()
-spec = W5H1(
+spec = Chunk(
     subject="Team",
     predicate="implements",
     object="feature",
@@ -1104,20 +1104,20 @@ result = walker.execute(spec)
 from sixspec.git.parser import CommitMessageParser
 ```
 
-Parse dimensional commit messages into CommitW5H1 objects.
+Parse dimensional commit messages into CommitChunk objects.
 
 #### Class Methods
 
-##### `parse(commit_msg: str, commit_hash: str = "") -> CommitW5H1`
+##### `parse(commit_msg: str, commit_hash: str = "") -> CommitChunk`
 
-Parse commit message into CommitW5H1 object.
+Parse commit message into CommitChunk object.
 
 **Parameters:**
 - `commit_msg`: The commit message text
 - `commit_hash`: The git commit hash (optional)
 
 **Returns:**
-- `CommitW5H1`: Parsed commit object
+- `CommitChunk`: Parsed commit object
 
 **Raises:**
 - `ValueError`: If message format is invalid
@@ -1133,7 +1133,7 @@ commit = CommitMessageParser.parse(msg, "abc123")
 print(commit.need(Dimension.WHY))  # "Users abandoning carts"
 ```
 
-##### `parse_git_log(repo_path: Path, n: Optional[int] = None, skip_invalid: bool = True) -> List[CommitW5H1]`
+##### `parse_git_log(repo_path: Path, n: Optional[int] = None, skip_invalid: bool = True) -> List[CommitChunk]`
 
 Parse recent commits from git log.
 
@@ -1143,7 +1143,7 @@ Parse recent commits from git log.
 - `skip_invalid`: If True, skip invalid commits; if False, raise ValueError
 
 **Returns:**
-- `List[CommitW5H1]`: List of parsed commit objects
+- `List[CommitChunk]`: List of parsed commit objects
 
 **Raises:**
 - `ValueError`: If git command fails or if skip_invalid=False and invalid commit found
@@ -1188,11 +1188,11 @@ history = DimensionalGitHistory(Path("."))
 #### Attributes
 
 - `repo_path` (Path): Path to git repository
-- `commits` (List[CommitW5H1]): List of dimensional commits
+- `commits` (List[CommitChunk]): List of dimensional commits
 
 #### Methods
 
-##### `query(where: str = None, why: str = None, what: str = None, who: str = None, when: str = None, how: str = None, commit_type: str = None) -> List[CommitW5H1]`
+##### `query(where: str = None, why: str = None, what: str = None, who: str = None, when: str = None, how: str = None, commit_type: str = None) -> List[CommitChunk]`
 
 Query commits by any dimension.
 
@@ -1206,7 +1206,7 @@ Query commits by any dimension.
 - `commit_type`: Filter by commit type (feat, fix, etc.)
 
 **Returns:**
-- `List[CommitW5H1]`: List of matching commits
+- `List[CommitChunk]`: List of matching commits
 
 **Example:**
 ```python
@@ -1224,7 +1224,7 @@ results = history.query(
 )
 ```
 
-##### `trace_file_purpose(file_path: str) -> List[CommitW5H1]`
+##### `trace_file_purpose(file_path: str) -> List[CommitChunk]`
 
 Find all commits affecting a specific file.
 
@@ -1232,7 +1232,7 @@ Find all commits affecting a specific file.
 - `file_path`: Path to file (substring match in WHERE dimension)
 
 **Returns:**
-- `List[CommitW5H1]`: List of commits affecting the file
+- `List[CommitChunk]`: List of commits affecting the file
 
 **Example:**
 ```python
@@ -1503,9 +1503,9 @@ StatusUpdate(
 ### Pattern 1: Basic Dimensional Spec
 
 ```python
-from sixspec.core import W5H1, Dimension
+from sixspec.core import Chunk, Dimension
 
-spec = W5H1("User", "wants", "feature")
+spec = Chunk("User", "wants", "feature")
 spec.set(Dimension.WHO, "Premium users", confidence=0.9)
 spec.set(Dimension.WHAT, "Export to PDF", confidence=0.7)
 spec.set(Dimension.WHY, "Data portability requirements")
@@ -1519,13 +1519,13 @@ if spec.get_confidence(Dimension.WHAT) < 0.8:
 
 ```python
 from sixspec.agents import NodeAgent
-from sixspec.core import W5H1, Dimension
+from sixspec.core import Chunk, Dimension
 
 class MyAgent(NodeAgent):
     def __init__(self):
         super().__init__("MyAgent", scope="custom")
 
-    def process_node(self, spec: W5H1) -> Any:
+    def process_node(self, spec: Chunk) -> Any:
         # Your processing logic
         return process(spec)
 
@@ -1537,10 +1537,10 @@ result = agent.execute(spec)
 
 ```python
 from sixspec.walkers import DiltsWalker
-from sixspec.core import DiltsLevel, W5H1, Dimension
+from sixspec.core import DiltsLevel, Chunk, Dimension
 
 walker = DiltsWalker(level=DiltsLevel.CAPABILITY)
-spec = W5H1(
+spec = Chunk(
     subject="Team",
     predicate="builds",
     object="feature",
@@ -1593,7 +1593,7 @@ for commit in results:
 spec.set(Dimension.WHO, "user", confidence=1.5)  # Raises ValueError
 
 # ValueError: Missing required dimensions
-commit = CommitW5H1("fix", "resolves", "bug")
+commit = CommitChunk("fix", "resolves", "bug")
 commit.is_complete()  # False, missing WHY and HOW
 
 # RuntimeError: Invalid state transition

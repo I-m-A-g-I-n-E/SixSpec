@@ -16,7 +16,7 @@ This enables:
 
 Example:
     >>> mission = DiltsWalker(level=DiltsLevel.MISSION)
-    >>> spec = W5H1(
+    >>> spec = Chunk(
     ...     subject="Company",
     ...     predicate="needs",
     ...     object="revenue",
@@ -32,7 +32,7 @@ from dataclasses import dataclass
 from typing import Any, List, Optional, Tuple
 
 from sixspec.agents.graph_agent import GraphAgent
-from sixspec.core.models import Dimension, DiltsLevel, W5H1
+from sixspec.core.models import Dimension, DiltsLevel, Chunk
 from sixspec.walkers.workspace import Workspace
 
 
@@ -94,7 +94,7 @@ class DiltsWalker(GraphAgent):
 
     Example:
         >>> parent = DiltsWalker(level=DiltsLevel.IDENTITY)
-        >>> parent_spec = W5H1(
+        >>> parent_spec = Chunk(
         ...     subject="Company",
         ...     predicate="launches",
         ...     object="product",
@@ -152,7 +152,7 @@ class DiltsWalker(GraphAgent):
         """
         self.context[dim] = value
 
-    def traverse(self, start: W5H1) -> Any:
+    def traverse(self, start: Chunk) -> Any:
         """
         Traverse down the Dilts hierarchy.
 
@@ -162,14 +162,14 @@ class DiltsWalker(GraphAgent):
         3. Otherwise, spawn child at lower level with WHAT→WHY propagation
 
         Args:
-            start: W5H1 specification to execute
+            start: Chunk specification to execute
 
         Returns:
             Result from ground action or child execution
 
         Example:
             >>> walker = DiltsWalker(level=DiltsLevel.CAPABILITY)
-            >>> spec = W5H1(
+            >>> spec = Chunk(
             ...     subject="System",
             ...     predicate="needs",
             ...     object="feature",
@@ -215,7 +215,7 @@ class DiltsWalker(GraphAgent):
         """
         return DiltsWalker(level=child_level, parent=self)
 
-    def _create_child_spec(self, base_spec: W5H1, parent_what: Optional[str]) -> W5H1:
+    def _create_child_spec(self, base_spec: Chunk, parent_what: Optional[str]) -> Chunk:
         """
         Create child spec with WHAT→WHY propagation.
 
@@ -224,7 +224,7 @@ class DiltsWalker(GraphAgent):
             parent_what: Parent's WHAT value
 
         Returns:
-            New W5H1 with parent's WHAT as WHY
+            New Chunk with parent's WHAT as WHY
         """
         # Create new dimensions dict with parent's WHAT as child's WHY
         child_dimensions = base_spec.dimensions.copy()
@@ -233,7 +233,7 @@ class DiltsWalker(GraphAgent):
 
         return base_spec.copy_with(dimensions=child_dimensions)
 
-    def spawn_children(self, n_strategies: int, base_spec: W5H1) -> List[Tuple['DiltsWalker', W5H1]]:
+    def spawn_children(self, n_strategies: int, base_spec: Chunk) -> List[Tuple['DiltsWalker', Chunk]]:
         """
         Spawn multiple children exploring different approaches.
 
@@ -251,7 +251,7 @@ class DiltsWalker(GraphAgent):
 
         Example:
             >>> walker = DiltsWalker(level=DiltsLevel.CAPABILITY)
-            >>> spec = W5H1(
+            >>> spec = Chunk(
             ...     subject="System",
             ...     predicate="needs",
             ...     object="payment",
@@ -284,7 +284,7 @@ class DiltsWalker(GraphAgent):
 
         return children
 
-    def execute_portfolio(self, spec: W5H1, n_strategies: int = 3) -> Any:
+    def execute_portfolio(self, spec: Chunk, n_strategies: int = 3) -> Any:
         """
         Execute multiple strategies in parallel.
 
@@ -303,7 +303,7 @@ class DiltsWalker(GraphAgent):
 
         Example:
             >>> walker = DiltsWalker(level=DiltsLevel.CAPABILITY)
-            >>> spec = W5H1(
+            >>> spec = Chunk(
             ...     subject="System",
             ...     predicate="needs",
             ...     object="payment",
@@ -366,7 +366,7 @@ class DiltsWalker(GraphAgent):
 
         Example:
             >>> L6 = DiltsWalker(level=DiltsLevel.MISSION)
-            >>> spec = W5H1(
+            >>> spec = Chunk(
             ...     subject="Company",
             ...     predicate="needs",
             ...     object="revenue",
@@ -394,7 +394,7 @@ class DiltsWalker(GraphAgent):
         # Reverse so root (Mission) is first
         return list(reversed(chain))
 
-    def execute_ground_action(self, spec: W5H1) -> str:
+    def execute_ground_action(self, spec: Chunk) -> str:
         """
         Level 1: Actually do the thing.
 
@@ -409,7 +409,7 @@ class DiltsWalker(GraphAgent):
 
         Example:
             >>> walker = DiltsWalker(level=DiltsLevel.ENVIRONMENT)
-            >>> spec = W5H1(
+            >>> spec = Chunk(
             ...     subject="System",
             ...     predicate="executes",
             ...     object="action",
@@ -426,7 +426,7 @@ class DiltsWalker(GraphAgent):
         why = spec.need(Dimension.WHY)
         return f"EXECUTED: {what} (because: {why})"
 
-    def generate_strategies(self, spec: W5H1, n: int) -> List[str]:
+    def generate_strategies(self, spec: Chunk, n: int) -> List[str]:
         """
         Generate n different strategies for achieving the goal.
 
@@ -453,7 +453,7 @@ class DiltsWalker(GraphAgent):
             ...         return ValidationResult(score=0.8, passed=True)
             >>> walker = ConcreteWalker(level=DiltsLevel.CAPABILITY)
             >>> strategies = walker.generate_strategies(
-            ...     W5H1("A", "B", "C", dimensions={Dimension.WHAT: "Build"}),
+            ...     Chunk("A", "B", "C", dimensions={Dimension.WHAT: "Build"}),
             ...     3
             ... )
             >>> len(strategies)

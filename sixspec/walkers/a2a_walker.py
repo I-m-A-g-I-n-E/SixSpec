@@ -14,11 +14,11 @@ Key Features:
 
 Example:
     >>> from sixspec.walkers.a2a_walker import A2AWalker
-    >>> from sixspec.core.models import DiltsLevel, W5H1, Dimension
+    >>> from sixspec.core.models import DiltsLevel, Chunk, Dimension
     >>>
     >>> # Create and execute walker
     >>> walker = A2AWalker(level=DiltsLevel.CAPABILITY)
-    >>> spec = W5H1(
+    >>> spec = Chunk(
     ...     subject="System",
     ...     predicate="needs",
     ...     object="payment",
@@ -39,7 +39,7 @@ Example:
 from typing import Any, Dict, List, Optional
 
 from sixspec.a2a import Task, TaskStatus, StatusUpdate
-from sixspec.core.models import Dimension, DiltsLevel, W5H1
+from sixspec.core.models import Dimension, DiltsLevel, Chunk
 from sixspec.walkers.dilts_walker import DiltsWalker
 
 
@@ -61,7 +61,7 @@ class A2AWalker(DiltsWalker):
 
     Example:
         >>> walker = A2AWalker(level=DiltsLevel.CAPABILITY)
-        >>> spec = W5H1("A", "B", "C", dimensions={
+        >>> spec = Chunk("A", "B", "C", dimensions={
         ...     Dimension.WHAT: "Build feature"
         ... })
         >>> walker.execute(spec)
@@ -96,7 +96,7 @@ class A2AWalker(DiltsWalker):
         )
 
         # State for pause/resume
-        self.paused_spec: Optional[W5H1] = None
+        self.paused_spec: Optional[Chunk] = None
         self.execution_result: Optional[Any] = None
 
         # Register child status handler if we have a parent
@@ -118,7 +118,7 @@ class A2AWalker(DiltsWalker):
         """
         return A2AWalker(level=child_level, parent=self)
 
-    def execute(self, spec: W5H1) -> Any:
+    def execute(self, spec: Chunk) -> Any:
         """
         Execute with A2A task lifecycle tracking.
 
@@ -130,7 +130,7 @@ class A2AWalker(DiltsWalker):
         - Support resume from paused state
 
         Args:
-            spec: W5H1 specification to execute
+            spec: Chunk specification to execute
 
         Returns:
             Result from execution
@@ -140,7 +140,7 @@ class A2AWalker(DiltsWalker):
 
         Example:
             >>> walker = A2AWalker(level=DiltsLevel.ENVIRONMENT)
-            >>> spec = W5H1("A", "B", "C", dimensions={
+            >>> spec = Chunk("A", "B", "C", dimensions={
             ...     Dimension.WHAT: "Run tests"
             ... })
             >>> result = walker.execute(spec)
@@ -212,7 +212,7 @@ class A2AWalker(DiltsWalker):
 
         Example:
             >>> walker = A2AWalker(level=DiltsLevel.CAPABILITY)
-            >>> spec = W5H1("A", "B", "C", dimensions={
+            >>> spec = Chunk("A", "B", "C", dimensions={
             ...     Dimension.WHAT: "Build feature"
             ... })
             >>> # Assume walker was paused during execution
@@ -307,7 +307,7 @@ class A2AWalker(DiltsWalker):
 
         Example:
             >>> walker = A2AWalker(level=DiltsLevel.CAPABILITY)
-            >>> spec = W5H1("A", "B", "C", dimensions={
+            >>> spec = Chunk("A", "B", "C", dimensions={
             ...     Dimension.WHAT: "Build feature",
             ...     Dimension.WHY: "Launch product"
             ... })
