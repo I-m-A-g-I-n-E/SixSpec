@@ -58,8 +58,7 @@ class Dimension(Enum):
     HOW = "how"
     WHY = "why"
 
-
-class DiltsLevel(Enum):
+class DiltsLevel(Enum): 
     """
     Dilts' Logical Levels for hierarchical organization.
 
@@ -88,7 +87,7 @@ class DiltsLevel(Enum):
         Returns the primary dimensions emphasized at this level.
 
         Each Dilts level naturally emphasizes certain dimensions:
-        - MISSION: WHY (purpose)
+        - MISSION: FOR WHAT (purpose)
         - IDENTITY: WHO (self-concept)
         - BELIEFS: WHY (values and principles)
         - CAPABILITY: HOW (skills and methods)
@@ -133,6 +132,9 @@ class DiltsLevel(Enum):
             DiltsLevel.ENVIRONMENT: "zero",
         }
         return mapping[self]
+
+L = DiltsLevel # convenience alias
+D = Dimension # convenience alias
 
 
 @dataclass
