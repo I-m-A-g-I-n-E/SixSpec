@@ -2,7 +2,7 @@
 Hypergraph auto-organization system for dimensional clustering.
 
 This module implements a hypergraph structure that automatically organizes
-W5H1 specifications based on shared dimensions, following the "grocery store rule":
+Chunk specifications based on shared dimensions, following the "grocery store rule":
 objects sharing at least one dimension belong to the same system.
 
 Key Concepts:
@@ -13,15 +13,15 @@ Key Concepts:
     - Hierarchy generation: Automatic organization into epic→story→task structure
 
 Example:
-    >>> from sixspec.core.models import W5H1, Dimension
+    >>> from sixspec.core.models import Chunk, Dimension
     >>> from sixspec.core.hypergraph import SpecificationHypergraph
     >>> 
     >>> graph = SpecificationHypergraph()
     >>> 
     >>> # Add grocery shopping tasks
-    >>> milk = W5H1("User", "buys", "milk",
+    >>> milk = Chunk("User", "buys", "milk",
     ...            dimensions={Dimension.WHERE: "grocery", Dimension.WHEN: "today"})
-    >>> bread = W5H1("User", "buys", "bread",
+    >>> bread = Chunk("User", "buys", "bread",
     ...             dimensions={Dimension.WHERE: "grocery", Dimension.WHEN: "today"})
     >>> 
     >>> graph.add_object(milk)
@@ -37,7 +37,7 @@ from dataclasses import dataclass, field
 from typing import Dict, List, Set, Tuple, Optional, Any
 import networkx as nx
 
-from sixspec.core.models import W5H1, Dimension
+from sixspec.core.models import Chunk, Dimension
 
 
 @dataclass
@@ -49,7 +49,7 @@ class HierarchyNode:
         level: Hierarchy level ('epic', 'story', 'task')
         name: Human-readable name generated from shared dimensions
         shared_dimensions: Dimensions common to all children
-        children: Child nodes or W5H1 objects
+        children: Child nodes or Chunk objects
         metadata: Additional metadata for the node
     """
     level: str
@@ -59,7 +59,7 @@ class HierarchyNode:
     metadata: Dict[str, Any] = field(default_factory=dict)
     
     def add_child(self, child: Any) -> None:
-        """Add a child node or W5H1 object."""
+        """Add a child node or Chunk object."""
         self.children.append(child)
     
     def to_dict(self) -> dict:
@@ -80,7 +80,7 @@ class HierarchyNode:
 
 class SpecificationHypergraph:
     """
-    Hypergraph for auto-organizing W5H1 specifications based on dimensions.
+    Hypergraph for auto-organizing Chunk specifications based on dimensions.
     
     This class implements the core hypergraph structure that automatically
     connects specifications based on shared dimensions and organizes them
@@ -94,24 +94,24 @@ class SpecificationHypergraph:
         """Initialize empty hypergraph."""
         self.graph = nx.Graph()
         self._object_counter = 0
-        self._object_map: Dict[str, W5H1] = {}
+        self._object_map: Dict[str, Chunk] = {}
     
-    def add_object(self, obj: W5H1) -> str:
+    def add_object(self, obj: Chunk) -> str:
         """
-        Add a W5H1 object to the hypergraph and auto-connect to related objects.
+        Add a Chunk object to the hypergraph and auto-connect to related objects.
         
         This method adds the object as a node and creates weighted edges to
         all other nodes based on the number of shared dimensions.
         
         Args:
-            obj: W5H1 object to add
+            obj: Chunk object to add
             
         Returns:
             Node ID assigned to the object
             
         Example:
             >>> graph = SpecificationHypergraph()
-            >>> spec = W5H1("User", "does", "task",
+            >>> spec = Chunk("User", "does", "task",
             ...            dimensions={Dimension.WHERE: "home"})
             >>> node_id = graph.add_object(spec)
         """
@@ -271,7 +271,7 @@ class SpecificationHypergraph:
         create a three-level hierarchy:
         - Epic: Groups of clusters with 2+ shared dimensions
         - Story: Individual clusters sharing dimensions
-        - Task: Individual W5H1 objects
+        - Task: Individual Chunk objects
         
         Returns:
             Root HierarchyNode containing the full hierarchy
