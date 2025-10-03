@@ -10,7 +10,7 @@ extreme autonomy. They can:
 
 Example:
     >>> walker = MissionWalker()
-    >>> spec = W5H1(
+    >>> spec = Chunk(
     ...     subject="Company",
     ...     predicate="needs",
     ...     object="growth",
@@ -23,7 +23,7 @@ Example:
 
 from typing import Any, List
 
-from sixspec.core.models import Dimension, DiltsLevel, W5H1
+from sixspec.core.models import Dimension, DiltsLevel, Chunk
 from sixspec.walkers.dilts_walker import DiltsWalker, ValidationResult
 
 
@@ -57,7 +57,7 @@ class MissionWalker(DiltsWalker):
         """
         super().__init__(level=DiltsLevel.MISSION, parent=parent)
 
-    def generate_strategies(self, spec: W5H1, n: int) -> List[str]:
+    def generate_strategies(self, spec: Chunk, n: int) -> List[str]:
         """
         Generate n radically different strategic approaches.
 
@@ -74,7 +74,7 @@ class MissionWalker(DiltsWalker):
 
         Example:
             >>> walker = MissionWalker()
-            >>> spec = W5H1(
+            >>> spec = Chunk(
             ...     subject="Company",
             ...     predicate="aims to",
             ...     object="growth",

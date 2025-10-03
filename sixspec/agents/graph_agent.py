@@ -2,7 +2,7 @@
 GraphAgent: Agent that operates on graph structures with relationship awareness.
 
 This module provides the GraphAgent base class for agents that need to
-understand and traverse relationships between W5H1 specifications.
+understand and traverse relationships between Chunk specifications.
 
 Key Characteristics:
 - Can work with partial specs
@@ -15,14 +15,14 @@ Example:
     ...     def traverse(self, start):
     ...         return [start] + self.neighbors
     >>> agent = SimpleGraphAgent("GraphWalker")
-    >>> spec = W5H1("A", "relates", "B")
+    >>> spec = Chunk("A", "relates", "B")
     >>> agent.execute(spec)
-    [<W5H1 object>, ...]
+    [<Chunk object>, ...]
 """
 
 from abc import abstractmethod
 from typing import Any, Dict, List, Optional, Set
-from sixspec.core.models import BaseActor, W5H1, Dimension
+from sixspec.core.models import BaseActor, Chunk, Dimension
 
 
 class GraphAgent(BaseActor):
@@ -71,11 +71,11 @@ class GraphAgent(BaseActor):
             name: Identifier for this agent
         """
         super().__init__(name)
-        self.current_node: Optional[W5H1] = None
+        self.current_node: Optional[Chunk] = None
         self.visited: Set[str] = set()
-        self.neighbors: List[W5H1] = []
+        self.neighbors: List[Chunk] = []
 
-    def understand(self, spec: W5H1) -> bool:
+    def understand(self, spec: Chunk) -> bool:
         """
         Check if this agent can process the given specification.
 
@@ -83,17 +83,17 @@ class GraphAgent(BaseActor):
         at least one dimension to start traversing from.
 
         Args:
-            spec: W5H1 specification to evaluate
+            spec: Chunk specification to evaluate
 
         Returns:
             True if spec has at least one dimension, False otherwise
 
         Example:
             >>> agent = GraphAgent("TestAgent")
-            >>> partial = W5H1("A", "B", "C", dimensions={
+            >>> partial = Chunk("A", "B", "C", dimensions={
             ...     Dimension.WHERE: "store"
             ... })
-            >>> empty = W5H1("A", "B", "C")
+            >>> empty = Chunk("A", "B", "C")
             >>> agent.understand(partial)
             True  # Has one dimension
             >>> agent.understand(empty)
@@ -101,7 +101,7 @@ class GraphAgent(BaseActor):
         """
         return len(spec.dimensions) > 0
 
-    def execute(self, spec: W5H1) -> Any:
+    def execute(self, spec: Chunk) -> Any:
         """
         Execute by traversing graph from this node.
 
@@ -109,7 +109,7 @@ class GraphAgent(BaseActor):
         and delegates to the subclass-specific traverse() method.
 
         Args:
-            spec: W5H1 specification to start traversal from
+            spec: Chunk specification to start traversal from
 
         Returns:
             Result from traverse() method
@@ -119,7 +119,7 @@ class GraphAgent(BaseActor):
             ...     def traverse(self, start):
             ...         return len(self.visited)
             >>> agent = CountingAgent("Counter")
-            >>> spec = W5H1("A", "B", "C", dimensions={
+            >>> spec = Chunk("A", "B", "C", dimensions={
             ...     Dimension.WHO: "user"
             ... })
             >>> agent.execute(spec)
@@ -131,7 +131,7 @@ class GraphAgent(BaseActor):
         return self.traverse(spec)
 
     @abstractmethod
-    def traverse(self, start: W5H1) -> Any:
+    def traverse(self, start: Chunk) -> Any:
         """
         Traverse graph from starting node.
 
@@ -139,7 +139,7 @@ class GraphAgent(BaseActor):
         strategy (breadth-first, depth-first, dependency-following, etc.).
 
         Args:
-            start: W5H1 node to start traversal from
+            start: Chunk node to start traversal from
 
         Returns:
             Result of traversal (type varies by implementation)
@@ -157,7 +157,7 @@ class GraphAgent(BaseActor):
         """
         pass
 
-    def find_neighbors(self, node: W5H1, graph: List[W5H1]) -> List[W5H1]:
+    def find_neighbors(self, node: Chunk, graph: List[Chunk]) -> List[Chunk]:
         """
         Find nodes that share dimensions (connected by edges).
 
@@ -169,17 +169,17 @@ class GraphAgent(BaseActor):
             graph: List of all nodes in the graph
 
         Returns:
-            List of neighboring W5H1 nodes
+            List of neighboring Chunk nodes
 
         Example:
             >>> agent = GraphAgent("Finder")
-            >>> node1 = W5H1("A", "B", "C", dimensions={
+            >>> node1 = Chunk("A", "B", "C", dimensions={
             ...     Dimension.WHERE: "service_a"
             ... })
-            >>> node2 = W5H1("D", "E", "F", dimensions={
+            >>> node2 = Chunk("D", "E", "F", dimensions={
             ...     Dimension.WHERE: "service_a"
             ... })
-            >>> node3 = W5H1("G", "H", "I", dimensions={
+            >>> node3 = Chunk("G", "H", "I", dimensions={
             ...     Dimension.WHERE: "service_b"
             ... })
             >>> graph = [node1, node2, node3]
@@ -200,7 +200,7 @@ class GraphAgent(BaseActor):
                     break
         return neighbors
 
-    def gather_context(self, node: W5H1, graph: List[W5H1]) -> Dict[Dimension, str]:
+    def gather_context(self, node: Chunk, graph: List[Chunk]) -> Dict[Dimension, str]:
         """
         Gather dimensional context from neighbors.
 
@@ -217,9 +217,9 @@ class GraphAgent(BaseActor):
 
         Example:
             >>> agent = GraphAgent("Gatherer")
-            >>> partial = W5H1("Payment", "processes", "transaction",
+            >>> partial = Chunk("Payment", "processes", "transaction",
             ...     dimensions={Dimension.WHERE: "payment_service"})
-            >>> neighbor = W5H1("User", "initiates", "payment",
+            >>> neighbor = Chunk("User", "initiates", "payment",
             ...     dimensions={
             ...         Dimension.WHERE: "payment_service",
             ...         Dimension.WHO: "authenticated_user"
@@ -241,7 +241,7 @@ class GraphAgent(BaseActor):
         return context
 
     @staticmethod
-    def node_id(node: W5H1) -> str:
+    def node_id(node: Chunk) -> str:
         """
         Generate unique ID for node.
 
@@ -249,13 +249,13 @@ class GraphAgent(BaseActor):
         triple, which uniquely identifies a node in the graph.
 
         Args:
-            node: W5H1 node to generate ID for
+            node: Chunk node to generate ID for
 
         Returns:
             String ID in format "subject:predicate:object"
 
         Example:
-            >>> node = W5H1("User", "wants", "feature")
+            >>> node = Chunk("User", "wants", "feature")
             >>> GraphAgent.node_id(node)
             'User:wants:feature'
         """

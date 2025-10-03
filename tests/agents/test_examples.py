@@ -10,7 +10,7 @@ These tests verify that:
 import pytest
 from sixspec.agents.examples.treesitter_agent import TreeSitterAgent
 from sixspec.agents.examples.dependency_analyzer import DependencyAnalyzer
-from sixspec.core.models import W5H1, Dimension
+from sixspec.core.models import Chunk, Dimension
 
 
 class TestTreeSitterAgent:
@@ -33,7 +33,7 @@ class TestTreeSitterAgent:
         agent = TreeSitterAgent()
 
         # Complete spec with WHERE dimension
-        complete = W5H1(
+        complete = Chunk(
             subject="File",
             predicate="contains",
             object="code",
@@ -45,7 +45,7 @@ class TestTreeSitterAgent:
         assert agent.understand(complete)
 
         # Incomplete spec without dimensions
-        incomplete = W5H1(
+        incomplete = Chunk(
             subject="File",
             predicate="contains",
             object="code",
@@ -57,7 +57,7 @@ class TestTreeSitterAgent:
         """Test TreeSitterAgent processing a file spec."""
         agent = TreeSitterAgent()
 
-        spec = W5H1(
+        spec = Chunk(
             subject="Module",
             predicate="defines",
             object="functions",
@@ -76,7 +76,7 @@ class TestTreeSitterAgent:
         """Test TreeSitterAgent execute method."""
         agent = TreeSitterAgent()
 
-        spec = W5H1(
+        spec = Chunk(
             subject="File",
             predicate="contains",
             object="code",
@@ -93,7 +93,7 @@ class TestTreeSitterAgent:
         """Test TreeSitterAgent handles missing WHERE dimension."""
         agent = TreeSitterAgent()
 
-        spec = W5H1(
+        spec = Chunk(
             subject="File",
             predicate="contains",
             object="code",
@@ -125,7 +125,7 @@ class TestDependencyAnalyzer:
         analyzer = DependencyAnalyzer()
 
         # Partial spec with just WHERE
-        partial = W5H1(
+        partial = Chunk(
             subject="Service",
             predicate="depends",
             object="library",
@@ -139,21 +139,21 @@ class TestDependencyAnalyzer:
         """Test finding dependencies that share WHERE dimension."""
         analyzer = DependencyAnalyzer()
 
-        service_spec = W5H1(
+        service_spec = Chunk(
             subject="Payment",
             predicate="processes",
             object="transaction",
             dimensions={Dimension.WHERE: "payment_service"}
         )
 
-        db_spec = W5H1(
+        db_spec = Chunk(
             subject="Database",
             predicate="stores",
             object="data",
             dimensions={Dimension.WHERE: "payment_service"}
         )
 
-        api_spec = W5H1(
+        api_spec = Chunk(
             subject="API",
             predicate="exposes",
             object="endpoint",
@@ -172,14 +172,14 @@ class TestDependencyAnalyzer:
         """Test DependencyAnalyzer with no shared dimensions."""
         analyzer = DependencyAnalyzer()
 
-        spec = W5H1(
+        spec = Chunk(
             subject="Service",
             predicate="runs",
             object="task",
             dimensions={Dimension.WHERE: "service_a"}
         )
 
-        unrelated = W5H1(
+        unrelated = Chunk(
             subject="Other",
             predicate="does",
             object="thing",
@@ -195,28 +195,28 @@ class TestDependencyAnalyzer:
         """Test finding multiple dependencies."""
         analyzer = DependencyAnalyzer()
 
-        main_spec = W5H1(
+        main_spec = Chunk(
             subject="Service",
             predicate="coordinates",
             object="workflow",
             dimensions={Dimension.WHERE: "backend"}
         )
 
-        dep1 = W5H1(
+        dep1 = Chunk(
             subject="Auth",
             predicate="validates",
             object="token",
             dimensions={Dimension.WHERE: "backend"}
         )
 
-        dep2 = W5H1(
+        dep2 = Chunk(
             subject="Logger",
             predicate="records",
             object="events",
             dimensions={Dimension.WHERE: "backend"}
         )
 
-        dep3 = W5H1(
+        dep3 = Chunk(
             subject="Cache",
             predicate="stores",
             object="data",
@@ -235,14 +235,14 @@ class TestDependencyAnalyzer:
         """Test DependencyAnalyzer execute method."""
         analyzer = DependencyAnalyzer()
 
-        spec = W5H1(
+        spec = Chunk(
             subject="Service",
             predicate="uses",
             object="resource",
             dimensions={Dimension.WHERE: "app"}
         )
 
-        neighbor = W5H1(
+        neighbor = Chunk(
             subject="Database",
             predicate="provides",
             object="storage",
@@ -275,7 +275,7 @@ class TestExampleIntegration:
         dep_analyzer = DependencyAnalyzer()
 
         # Partial spec
-        partial = W5H1(
+        partial = Chunk(
             subject="Code",
             predicate="exists",
             object="somewhere",
@@ -283,7 +283,7 @@ class TestExampleIntegration:
         )
 
         # Complete spec
-        complete = W5H1(
+        complete = Chunk(
             subject="Code",
             predicate="exists",
             object="somewhere",
@@ -305,7 +305,7 @@ class TestExampleIntegration:
         from sixspec.core.models import BaseActor
         from typing import List
 
-        def process_with_agents(agents: List[BaseActor], spec: W5H1):
+        def process_with_agents(agents: List[BaseActor], spec: Chunk):
             """Function that accepts BaseActor instances."""
             results = []
             for agent in agents:
@@ -316,7 +316,7 @@ class TestExampleIntegration:
         tree_agent = TreeSitterAgent()
         dep_analyzer = DependencyAnalyzer()
 
-        spec = W5H1(
+        spec = Chunk(
             subject="Test",
             predicate="runs",
             object="code",

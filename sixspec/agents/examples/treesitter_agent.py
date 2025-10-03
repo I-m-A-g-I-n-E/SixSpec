@@ -7,7 +7,7 @@ on individual code files without needing graph context.
 Example:
     >>> from sixspec.agents.examples import TreeSitterAgent
     >>> agent = TreeSitterAgent()
-    >>> spec = W5H1("File", "contains", "code",
+    >>> spec = Chunk("File", "contains", "code",
     ...     dimensions={Dimension.WHERE: "/path/to/file.py"})
     >>> result = agent.process_node(spec)
     >>> print(result)
@@ -16,7 +16,7 @@ Example:
 
 from typing import Any
 from sixspec.agents.node_agent import NodeAgent
-from sixspec.core.models import W5H1, Dimension
+from sixspec.core.models import Chunk, Dimension
 
 
 class TreeSitterAgent(NodeAgent):
@@ -43,7 +43,7 @@ class TreeSitterAgent(NodeAgent):
         'TreeSitter'
         >>> agent.scope
         'code_file'
-        >>> spec = W5H1("File", "contains", "code",
+        >>> spec = Chunk("File", "contains", "code",
         ...     dimensions={Dimension.WHERE: "main.py"})
         >>> agent.understand(spec)
         True
@@ -61,7 +61,7 @@ class TreeSitterAgent(NodeAgent):
         """
         super().__init__("TreeSitter", scope="code_file")
 
-    def process_node(self, spec: W5H1) -> Any:
+    def process_node(self, spec: Chunk) -> Any:
         """
         Parse the code file into AST (mock implementation).
 
@@ -73,14 +73,14 @@ class TreeSitterAgent(NodeAgent):
         3. Return a structured AST object
 
         Args:
-            spec: W5H1 specification with WHERE dimension set to file path
+            spec: Chunk specification with WHERE dimension set to file path
 
         Returns:
             String describing the parsing result
 
         Example:
             >>> agent = TreeSitterAgent()
-            >>> spec = W5H1("Module", "defines", "functions",
+            >>> spec = Chunk("Module", "defines", "functions",
             ...     dimensions={Dimension.WHERE: "/src/utils.py"})
             >>> result = agent.process_node(spec)
             >>> result

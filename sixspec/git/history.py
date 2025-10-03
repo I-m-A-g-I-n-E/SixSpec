@@ -3,7 +3,7 @@
 from pathlib import Path
 from typing import List, Optional
 
-from ..core import CommitW5H1, Dimension
+from ..core import CommitChunk, Dimension
 from .parser import CommitMessageParser
 
 
@@ -20,15 +20,15 @@ class DimensionalGitHistory:
         """
         self.repo_path = Path(repo_path)
         self.skip_invalid = skip_invalid
-        self._commits: Optional[List[CommitW5H1]] = None
+        self._commits: Optional[List[CommitChunk]] = None
 
     @property
-    def commits(self) -> List[CommitW5H1]:
+    def commits(self) -> List[CommitChunk]:
         """
         Lazy-load and cache all dimensional commits.
 
         Returns:
-            List of CommitW5H1 objects
+            List of CommitChunk objects
         """
         if self._commits is None:
             self._commits = CommitMessageParser.parse_git_log(
@@ -50,7 +50,7 @@ class DimensionalGitHistory:
         when: Optional[str] = None,
         how: Optional[str] = None,
         commit_type: Optional[str] = None
-    ) -> List[CommitW5H1]:
+    ) -> List[CommitChunk]:
         """
         Query commits by dimensional criteria.
 
@@ -66,7 +66,7 @@ class DimensionalGitHistory:
             commit_type: Filter by commit type (feat, fix, refactor, etc.)
 
         Returns:
-            List of matching CommitW5H1 objects
+            List of matching CommitChunk objects
         """
         results = self.commits
 
@@ -114,7 +114,7 @@ class DimensionalGitHistory:
 
         return results
 
-    def trace_file_purpose(self, file_path: str) -> List[CommitW5H1]:
+    def trace_file_purpose(self, file_path: str) -> List[CommitChunk]:
         """
         Find all commits that modified a file and their WHY.
 
@@ -122,7 +122,7 @@ class DimensionalGitHistory:
             file_path: Path to file or component name
 
         Returns:
-            List of CommitW5H1 objects sorted chronologically
+            List of CommitChunk objects sorted chronologically
         """
         commits = self.query(where=file_path)
         # Sort by commit hash (chronological order depends on git history)

@@ -12,7 +12,7 @@ Most walkers start at Capability level (L3).
 
 Example:
     >>> walker = CapabilityWalker()
-    >>> spec = W5H1(
+    >>> spec = Chunk(
     ...     subject="System",
     ...     predicate="needs",
     ...     object="payment",
@@ -28,7 +28,7 @@ Example:
 
 from typing import Any, List, Optional
 
-from sixspec.core.models import Dimension, DiltsLevel, W5H1
+from sixspec.core.models import Dimension, DiltsLevel, Chunk
 from sixspec.walkers.dilts_walker import DiltsWalker, ValidationResult
 
 
@@ -65,7 +65,7 @@ class CapabilityWalker(DiltsWalker):
         """
         super().__init__(level=DiltsLevel.CAPABILITY, parent=parent)
 
-    def generate_strategies(self, spec: W5H1, n: int) -> List[str]:
+    def generate_strategies(self, spec: Chunk, n: int) -> List[str]:
         """
         Generate n different implementation approaches.
 
@@ -82,7 +82,7 @@ class CapabilityWalker(DiltsWalker):
 
         Example:
             >>> walker = CapabilityWalker()
-            >>> spec = W5H1(
+            >>> spec = Chunk(
             ...     subject="System",
             ...     predicate="needs",
             ...     object="auth",

@@ -3,7 +3,7 @@
 import pytest
 from pathlib import Path
 
-from sixspec.core import CommitW5H1, Dimension
+from sixspec.core import CommitChunk, Dimension
 from sixspec.git.parser import CommitMessageParser
 
 
@@ -138,11 +138,11 @@ WHERE: src/payment/stripe.py"""
         assert commit.need(Dimension.WHO) is None
 
     def test_commit_w5h1_validation(self):
-        """Test that CommitW5H1 validates required dimensions."""
-        from sixspec.core import CommitW5H1
+        """Test that CommitChunk validates required dimensions."""
+        from sixspec.core import CommitChunk
 
         # Incomplete without WHY
-        commit1 = CommitW5H1(
+        commit1 = CommitChunk(
             subject="fix",
             predicate="changes",
             object="something",
@@ -152,7 +152,7 @@ WHERE: src/payment/stripe.py"""
         assert Dimension.WHY in commit1.required_dimensions()
 
         # Incomplete without HOW
-        commit2 = CommitW5H1(
+        commit2 = CommitChunk(
             subject="fix",
             predicate="changes",
             object="something",
@@ -162,7 +162,7 @@ WHERE: src/payment/stripe.py"""
         assert Dimension.HOW in commit2.required_dimensions()
 
         # Complete with both WHY and HOW
-        commit3 = CommitW5H1(
+        commit3 = CommitChunk(
             subject="fix",
             predicate="changes",
             object="something",

@@ -11,7 +11,7 @@ Tests cover:
 """
 
 import pytest
-from sixspec.core.models import Dimension, DiltsLevel, W5H1
+from sixspec.core.models import Dimension, DiltsLevel, Chunk
 from sixspec.walkers.dilts_walker import DiltsWalker, ValidationResult
 from sixspec.walkers.strategies.mission_strategy import MissionWalker
 from sixspec.walkers.strategies.capability_strategy import CapabilityWalker
@@ -25,7 +25,7 @@ def test_what_becomes_why():
     """
     # Create parent walker at Identity level
     parent = MissionWalker()
-    parent_spec = W5H1(
+    parent_spec = Chunk(
         subject="Company",
         predicate="launches",
         object="product",
@@ -48,7 +48,7 @@ def test_full_hierarchy():
     Should descend from Mission (L6) to Environment (L1).
     """
     mission = MissionWalker()
-    spec = W5H1(
+    spec = Chunk(
         subject="Company",
         predicate="needs to",
         object="grow",
@@ -70,7 +70,7 @@ def test_provenance():
     Should be able to trace WHY chain from L1 to L6.
     """
     L6 = MissionWalker()
-    spec = W5H1(
+    spec = Chunk(
         subject="Company",
         predicate="needs",
         object="revenue",
@@ -100,7 +100,7 @@ def test_autonomy_gradient():
     """
     # Mission level - extreme autonomy
     mission = MissionWalker()
-    mission_spec = W5H1(
+    mission_spec = Chunk(
         subject="Company",
         predicate="aims",
         object="growth",
@@ -110,7 +110,7 @@ def test_autonomy_gradient():
 
     # Capability level - low autonomy
     capability = CapabilityWalker()
-    capability_spec = W5H1(
+    capability_spec = Chunk(
         subject="System",
         predicate="needs",
         object="feature",
@@ -134,7 +134,7 @@ def test_portfolio_execution():
     Should try multiple approaches and pick the best.
     """
     walker = CapabilityWalker()
-    spec = W5H1(
+    spec = Chunk(
         subject="System",
         predicate="needs",
         object="payment",
@@ -162,7 +162,7 @@ def test_workspace_isolation():
     walker1 = CapabilityWalker()
     walker2 = CapabilityWalker()
 
-    spec = W5H1(
+    spec = Chunk(
         subject="System",
         predicate="executes",
         object="task",
@@ -186,7 +186,7 @@ def test_ground_action():
     walker = CapabilityWalker()
     walker.level = DiltsLevel.ENVIRONMENT  # Override to L1 for testing
 
-    spec = W5H1(
+    spec = Chunk(
         subject="System",
         predicate="executes",
         object="action",
@@ -231,7 +231,7 @@ def test_context_propagation():
     Test that context is properly maintained and propagated.
     """
     parent = CapabilityWalker()
-    parent_spec = W5H1(
+    parent_spec = Chunk(
         subject="System",
         predicate="needs",
         object="feature",
@@ -254,14 +254,14 @@ def test_spawn_children():
     Test spawning multiple children with different strategies.
     """
     walker = CapabilityWalker()
-    walker.current_node = W5H1(
+    walker.current_node = Chunk(
         subject="System",
         predicate="needs",
         object="feature",
         dimensions={Dimension.WHAT: "Implement feature"}
     )
 
-    base_spec = W5H1(
+    base_spec = Chunk(
         subject="System",
         predicate="builds",
         object="component",
@@ -278,7 +278,7 @@ def test_spawn_children():
     # 2. A spec with parent's WHAT as WHY
     for child_walker, child_spec in children:
         assert isinstance(child_walker, DiltsWalker)
-        assert isinstance(child_spec, W5H1)
+        assert isinstance(child_spec, Chunk)
         assert child_spec.need(Dimension.WHY) == "Implement feature"
 
 
@@ -300,7 +300,7 @@ def test_empty_spec_handling():
     Test handling of specs with missing dimensions.
     """
     walker = CapabilityWalker()
-    spec = W5H1(
+    spec = Chunk(
         subject="System",
         predicate="does",
         object="something",
@@ -322,7 +322,7 @@ def test_multiple_levels_of_children():
     Test that hierarchy correctly creates multiple levels.
     """
     mission = MissionWalker()
-    spec = W5H1(
+    spec = Chunk(
         subject="Company",
         predicate="aims",
         object="growth",
