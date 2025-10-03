@@ -10,7 +10,7 @@ Tests the auto-organization capabilities including:
 """
 
 import pytest
-from sixspec.core.models import W5H1, Dimension
+from sixspec.core.models import Chunk, Dimension
 from sixspec.core.hypergraph import SpecificationHypergraph, HierarchyNode
 
 
@@ -27,8 +27,8 @@ class TestSpecificationHypergraph:
     def test_add_single_object(self):
         """Test adding a single object to the graph."""
         graph = SpecificationHypergraph()
-        obj = W5H1("User", "does", "task",
-                   dimensions={Dimension.WHERE: "home"})
+        obj = Chunk("User", "does", "task",
+                    dimensions={Dimension.WHERE: "home"})
         
         node_id = graph.add_object(obj)
         
@@ -41,10 +41,10 @@ class TestSpecificationHypergraph:
         """Test that objects sharing dimensions auto-connect."""
         graph = SpecificationHypergraph()
         
-        obj1 = W5H1("User", "buys", "milk",
-                    dimensions={Dimension.WHERE: "grocery"})
-        obj2 = W5H1("User", "buys", "bread",
-                    dimensions={Dimension.WHERE: "grocery"})
+        obj1 = Chunk("User", "buys", "milk",
+                     dimensions={Dimension.WHERE: "grocery"})
+        obj2 = Chunk("User", "buys", "bread",
+                     dimensions={Dimension.WHERE: "grocery"})
         
         node1 = graph.add_object(obj1)
         node2 = graph.add_object(obj2)
@@ -64,9 +64,9 @@ class TestSpecificationHypergraph:
         """Test that objects with no shared dimensions don't connect."""
         graph = SpecificationHypergraph()
         
-        obj1 = W5H1("User", "buys", "milk",
+        obj1 = Chunk("User", "buys", "milk",
                     dimensions={Dimension.WHERE: "grocery"})
-        obj2 = W5H1("User", "buys", "hammer",
+        obj2 = Chunk("User", "buys", "hammer",
                     dimensions={Dimension.WHAT: "tool"})
         
         node1 = graph.add_object(obj1)
@@ -83,13 +83,13 @@ class TestSpecificationHypergraph:
         """Test edge weight increases with more shared dimensions."""
         graph = SpecificationHypergraph()
         
-        obj1 = W5H1("User", "buys", "milk",
+        obj1 = Chunk("User", "buys", "milk",
                     dimensions={
                         Dimension.WHERE: "grocery",
                         Dimension.WHEN: "today",
                         Dimension.WHO: "John"
                     })
-        obj2 = W5H1("User", "buys", "bread",
+        obj2 = Chunk("User", "buys", "bread",
                     dimensions={
                         Dimension.WHERE: "grocery",
                         Dimension.WHEN: "today",
@@ -109,19 +109,19 @@ class TestSpecificationHypergraph:
         graph = SpecificationHypergraph()
         
         # Grocery shopping tasks
-        grocery1 = W5H1("User", "buys", "milk",
+        grocery1 = Chunk("User", "buys", "milk",
                        dimensions={
                            Dimension.WHERE: "grocery",
                            Dimension.WHEN: "today"
                        })
-        grocery2 = W5H1("User", "buys", "bread",
+        grocery2 = Chunk("User", "buys", "bread",
                        dimensions={
                            Dimension.WHERE: "grocery",
                            Dimension.WHEN: "today"
                        })
         
         # Hardware store task
-        hardware = W5H1("User", "buys", "hammer",
+        hardware = Chunk("User", "buys", "hammer",
                        dimensions={
                            Dimension.WHERE: "hardware",
                            Dimension.WHEN: "today"
@@ -151,13 +151,13 @@ class TestSpecificationHypergraph:
         """Test finding common dimensions in a cluster."""
         graph = SpecificationHypergraph()
         
-        obj1 = W5H1("User", "buys", "milk",
+        obj1 = Chunk("User", "buys", "milk",
                     dimensions={
                         Dimension.WHERE: "grocery",
                         Dimension.WHEN: "today",
                         Dimension.WHO: "John"
                     })
-        obj2 = W5H1("User", "buys", "bread",
+        obj2 = Chunk("User", "buys", "bread",
                     dimensions={
                         Dimension.WHERE: "grocery",
                         Dimension.WHEN: "today",
@@ -182,13 +182,13 @@ class TestSpecificationHypergraph:
         graph = SpecificationHypergraph()
         
         # Monday grocery shopping
-        monday1 = W5H1("User", "buys", "milk",
+        monday1 = Chunk("User", "buys", "milk",
                       dimensions={
                           Dimension.WHERE: "grocery",
                           Dimension.WHEN: "monday",
                           Dimension.WHO: "John"
                       })
-        monday2 = W5H1("User", "buys", "bread",
+        monday2 = Chunk("User", "buys", "bread",
                       dimensions={
                           Dimension.WHERE: "grocery",
                           Dimension.WHEN: "monday",
@@ -196,13 +196,13 @@ class TestSpecificationHypergraph:
                       })
         
         # Tuesday grocery shopping (same person and store)
-        tuesday1 = W5H1("User", "buys", "eggs",
+        tuesday1 = Chunk("User", "buys", "eggs",
                        dimensions={
                            Dimension.WHERE: "grocery",
                            Dimension.WHEN: "tuesday",
                            Dimension.WHO: "John"
                        })
-        tuesday2 = W5H1("User", "buys", "butter",
+        tuesday2 = Chunk("User", "buys", "butter",
                        dimensions={
                            Dimension.WHERE: "grocery",
                            Dimension.WHEN: "tuesday",
@@ -225,12 +225,12 @@ class TestSpecificationHypergraph:
         graph = SpecificationHypergraph()
         
         # Add related tasks
-        obj1 = W5H1("User", "buys", "milk",
+        obj1 = Chunk("User", "buys", "milk",
                     dimensions={
                         Dimension.WHERE: "grocery",
                         Dimension.WHEN: "today"
                     })
-        obj2 = W5H1("User", "buys", "bread",
+        obj2 = Chunk("User", "buys", "bread",
                     dimensions={
                         Dimension.WHERE: "grocery",
                         Dimension.WHEN: "today"
@@ -261,30 +261,30 @@ class TestSpecificationHypergraph:
         graph = SpecificationHypergraph()
         
         # Today's errands
-        grocery1 = W5H1("User", "buys", "milk",
+        grocery1 = Chunk("User", "buys", "milk",
                        dimensions={
                            Dimension.WHERE: "grocery",
                            Dimension.WHEN: "today"
                        })
-        grocery2 = W5H1("User", "buys", "bread",
+        grocery2 = Chunk("User", "buys", "bread",
                        dimensions={
                            Dimension.WHERE: "grocery",
                            Dimension.WHEN: "today"
                        })
-        hardware = W5H1("User", "buys", "hammer",
+        hardware = Chunk("User", "buys", "hammer",
                        dimensions={
                            Dimension.WHERE: "hardware",
                            Dimension.WHEN: "today"
                        })
         
         # Tomorrow's cooking (completely different)
-        cooking1 = W5H1("User", "prepares", "ingredients",
+        cooking1 = Chunk("User", "prepares", "ingredients",
                        dimensions={
                            Dimension.WHERE: "kitchen",
                            Dimension.WHEN: "tomorrow",
                            Dimension.WHAT: "dinner"
                        })
-        cooking2 = W5H1("User", "cooks", "meal",
+        cooking2 = Chunk("User", "cooks", "meal",
                        dimensions={
                            Dimension.WHERE: "kitchen",
                            Dimension.WHEN: "tomorrow",
@@ -341,7 +341,7 @@ class TestSpecificationHypergraph:
         """Test retrieving node information."""
         graph = SpecificationHypergraph()
         
-        obj = W5H1("User", "does", "task",
+        obj = Chunk("User", "does", "task",
                    dimensions={Dimension.WHERE: "home"})
         node_id = graph.add_object(obj)
         
@@ -360,10 +360,10 @@ class TestSpecificationHypergraph:
         """Test exporting graph to dictionary."""
         graph = SpecificationHypergraph()
         
-        obj1 = W5H1("User", "buys", "milk",
-                    dimensions={Dimension.WHERE: "grocery"})
-        obj2 = W5H1("User", "buys", "bread",
-                    dimensions={Dimension.WHERE: "grocery"})
+        obj1 = Chunk("User", "buys", "milk",
+                     dimensions={Dimension.WHERE: "grocery"})
+        obj2 = Chunk("User", "buys", "bread",
+                     dimensions={Dimension.WHERE: "grocery"})
         
         graph.add_object(obj1)
         graph.add_object(obj2)
@@ -400,18 +400,18 @@ class TestSpecificationHypergraph:
         graph = SpecificationHypergraph()
         
         # A shares WHERE with B
-        obj_a = W5H1("User", "does", "A",
+        obj_a = Chunk("User", "does", "A",
                      dimensions={Dimension.WHERE: "place1"})
         
         # B shares WHERE with A and WHEN with C
-        obj_b = W5H1("User", "does", "B",
+        obj_b = Chunk("User", "does", "B",
                      dimensions={
                          Dimension.WHERE: "place1",
                          Dimension.WHEN: "time1"
                      })
         
         # C shares WHEN with B but nothing with A
-        obj_c = W5H1("User", "does", "C",
+        obj_c = Chunk("User", "does", "C",
                      dimensions={Dimension.WHEN: "time1"})
         
         graph.add_object(obj_a)
@@ -428,13 +428,13 @@ class TestSpecificationHypergraph:
         graph = SpecificationHypergraph()
         
         # Group 1: Shopping tasks (WHERE + WHEN shared)
-        shop1 = W5H1("User", "shops", "groceries",
+        shop1 = Chunk("User", "shops", "groceries",
                      dimensions={
                          Dimension.WHERE: "store",
                          Dimension.WHEN: "morning",
                          Dimension.WHO: "Alice"
                      })
-        shop2 = W5H1("User", "shops", "supplies",
+        shop2 = Chunk("User", "shops", "supplies",
                      dimensions={
                          Dimension.WHERE: "store",
                          Dimension.WHEN: "morning",
@@ -442,13 +442,13 @@ class TestSpecificationHypergraph:
                      })
         
         # Group 2: Work tasks (WHO + HOW shared, different WHEN)
-        work1 = W5H1("User", "codes", "feature",
+        work1 = Chunk("User", "codes", "feature",
                      dimensions={
                          Dimension.WHO: "Bob",
                          Dimension.HOW: "agile",
                          Dimension.WHEN: "afternoon"
                      })
-        work2 = W5H1("User", "reviews", "code",
+        work2 = Chunk("User", "reviews", "code",
                      dimensions={
                          Dimension.WHO: "Bob",
                          Dimension.HOW: "agile",
