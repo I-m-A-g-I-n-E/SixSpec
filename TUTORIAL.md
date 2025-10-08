@@ -8,7 +8,7 @@ Welcome to SixSpec! This tutorial will teach you the framework from the ground u
 2. **Git Integration**: Dimensional commits
 3. **Agents**: Building dimensional-aware agents
 4. **Walkers**: Hierarchical execution
-5. **Advanced**: Portfolio execution and A2A integration
+5. **Advanced**: Portfolio execution and Claude Agent SDK integration
 
 ---
 
@@ -578,63 +578,63 @@ for i, child in enumerate(walker.children):
     print(f"  Strategy {i+1}: {child.context.get(Dimension.WHAT, 'N/A')}")
 ```
 
-### Exercise 5.2: A2A Task Lifecycle
+### Exercise 5.2: Session Management with Claude Agent SDK
 
-A2A (Agent-to-Agent) protocol enables graceful interruption and resume.
+ClaudeWalker integrates with the Claude Agent SDK for graceful pause/resume and session management.
 
 ```python
-from sixspec.walkers import A2AWalker
-from sixspec.core import DiltsLevel, W5H1, Dimension
-from sixspec.a2a import TaskStatus
-import time
+from sixspec.walkers import ClaudeWalker
+from sixspec.core import DiltsLevel, Chunk, Dimension
+import asyncio
 
-# Create A2A-enabled walker
-walker = A2AWalker(level=DiltsLevel.CAPABILITY)
+async def main():
+    # Create Claude SDK-enabled walker
+    walker = ClaudeWalker(level=DiltsLevel.CAPABILITY)
 
-# Subscribe to status updates
-def handle_status_update(update):
-    print(f"Status: {update.status.value}")
-    if update.result:
-        print(f"Result: {update.result}")
+    # Create spec
+    spec = Chunk(
+        subject="System",
+        predicate="processes",
+        object="data",
+        dimensions={
+            Dimension.WHAT: "Process user data export",
+            Dimension.WHY: "GDPR compliance request"
+        }
+    )
 
-walker.task.on_status_change(handle_status_update)
+    # Start execution
+    print("Starting task...")
+    try:
+        # Execute (this connects to Claude SDK)
+        result = await walker.execute(spec)
 
-# Create spec
-spec = W5H1(
-    subject="System",
-    predicate="processes",
-    object="data",
-    dimensions={
-        Dimension.WHAT: "Process user data export",
-        Dimension.WHY: "GDPR compliance request"
-    }
-)
+        print(f"Session ID: {walker.session_id}")
+        print(f"Context preserved: WHY = {walker.context.get(Dimension.WHY)}")
 
-# Start execution
-print("Starting task...")
-walker.task.start()
+        # Check progress
+        progress = walker.get_progress()
+        print(f"\nProgress:")
+        print(f"  Level: {progress['level']}")
+        print(f"  WHAT: {progress['what']}")
+        print(f"  WHY: {progress['why']}")
 
-# Simulate work
-print("Task running...")
-time.sleep(0.1)
+        # Pause gracefully
+        print("\nPausing task (user interrupt)...")
+        session_id = await walker.pause()
+        print(f"Paused: {walker.is_paused}")
+        print(f"Session for resume: {session_id}")
 
-# Pause gracefully
-print("\nPausing task (user interrupt)...")
-walker.task.pause()
-print(f"Task status: {walker.task.status.value}")
-print(f"Context preserved: WHY = {walker.context.get(Dimension.WHY)}")
+        # Resume later
+        print("\nResuming task...")
+        result = await walker.resume(session_id, spec)
+        print(f"Resumed: not {walker.is_paused}")
+        print(f"Result: {result}")
 
-# Resume later
-print("\nResuming task...")
-walker.task.resume()
-print(f"Task status: {walker.task.status.value}")
-print(f"Context restored: WHY = {walker.context.get(Dimension.WHY)}")
+    except Exception as e:
+        print(f"Error: {e}")
 
-# Complete
-result = walker.traverse(spec)
-walker.task.complete(result)
-print(f"\nTask status: {walker.task.status.value}")
-print(f"Result: {walker.task.result}")
+# Run the async function
+asyncio.run(main())
 ```
 
 ### Exercise 5.3: Custom Strategy Walker
@@ -840,7 +840,7 @@ Congratulations! You've learned:
 3. ✅ Building NodeAgents and GraphAgents
 4. ✅ Hierarchical walkers with WHAT→WHY propagation
 5. ✅ Portfolio execution and validation
-6. ✅ A2A task lifecycle management
+6. ✅ Claude Agent SDK session management
 
 ### Further Learning
 

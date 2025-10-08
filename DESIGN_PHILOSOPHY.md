@@ -183,25 +183,31 @@ class EnvironmentWalker(DiltsWalker):
 
 **Principle**: Systems should pause and resume without losing context.
 
-**Rationale**: Real work gets interrupted. A2A protocol enables graceful pause/resume while preserving the full WHAT→WHY chain.
+**Rationale**: Real work gets interrupted. Claude Agent SDK enables graceful pause/resume via session management while preserving the full WHAT→WHY chain.
 
 **In Practice:**
 ```python
-walker = A2AWalker(level=DiltsLevel.CAPABILITY)
-walker.task.start()
+import asyncio
+from sixspec.walkers import ClaudeWalker
 
-# Work happens...
-# User interrupts
+async def main():
+    walker = ClaudeWalker(level=DiltsLevel.CAPABILITY)
+    result = await walker.execute(spec)
 
-walker.task.pause()  # Cascade to all children
-# All context preserved:
-# - WHAT→WHY chain
-# - Workspace data
-# - Task hierarchy
+    # Work happens...
+    # User interrupts
 
-# Later...
-walker.task.resume()  # Bottom-up: children first
-# Continues exactly where it left off
+    session_id = await walker.pause()  # Cascade to all children via SDK
+    # All context preserved:
+    # - WHAT→WHY chain
+    # - Workspace data
+    # - Session ID for resume
+
+    # Later...
+    result = await walker.resume(session_id, spec)  # SDK resumes from session
+    # Continues exactly where it left off
+
+asyncio.run(main())
 ```
 
 ### 8. Self-Documentation
@@ -302,19 +308,22 @@ history.trace_file_purpose("payment.py")  # See evolution with reasons
 - Problem: First guess often wrong
 - Problem: No comparison data
 
-### Why A2A Protocol?
+### Why Claude Agent SDK?
 
-**Decision**: Implement Google's Agent-to-Agent protocol.
+**Decision**: Integrate with the official Claude Agent SDK for session management.
 
 **Rationale**:
-- Standard: Emerging industry standard
-- Graceful: Pause/resume without context loss
-- Hierarchical: Parent-child coordination
-- Production-ready: Battle-tested pattern
+- Official: Maintained by Anthropic
+- Standard: Industry-standard SDK pattern
+- Graceful: Pause/resume via session IDs without context loss
+- Hierarchical: Subagent coordination for parent-child
+- Production-ready: Battle-tested and actively maintained
+- Future-proof: Evolves with Claude capabilities
 
-**Alternative Considered**: Custom lifecycle
-- Problem: Reinventing the wheel
-- Problem: Less likely to integrate with other systems
+**Previous Approach**: Custom A2A implementation (now deprecated)
+- Worked but: ~900 lines of custom code to maintain
+- Problem: Not maintained, missing new SDK features
+- Migration: See [MIGRATION_A2A_TO_CLAUDE_SDK.md](MIGRATION_A2A_TO_CLAUDE_SDK.md)
 
 ---
 

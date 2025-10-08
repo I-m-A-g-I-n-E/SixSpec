@@ -91,7 +91,8 @@ Application Layer → Walker Layer → Agent Layer → Core Layer → Integratio
 
 ### Walker Layer (`sixspec/walkers/`)
 - **DiltsWalker**: Core hierarchical delegation with WHAT→WHY propagation
-- **A2AWalker**: Adds Google A2A protocol for graceful pause/resume
+- **ClaudeWalker**: Adds Claude Agent SDK integration for session management and pause/resume
+- **A2AWalker**: (DEPRECATED) Custom A2A implementation - use ClaudeWalker instead
 - **Workspace**: Isolated execution environment per walker
 - **Strategies**: Level-specific implementations (MissionWalker, CapabilityWalker)
 
@@ -100,9 +101,14 @@ Application Layer → Walker Layer → Agent Layer → Core Layer → Integratio
 - **history.py**: `DimensionalGitHistory` - Queryable commit history
 - **hooks/commit-msg**: Git hook that validates WHY and HOW dimensions
 
-### A2A Integration (`sixspec/a2a/`)
-- **task.py**: `Task` class with lifecycle (PENDING → RUNNING → PAUSED/COMPLETED/FAILED)
-- **status.py**: `TaskStatus` enum and `StatusUpdate` for real-time streaming
+### Claude SDK Integration (`sixspec/walkers/claude_walker.py`)
+- **ClaudeWalker**: Async walker using Claude Agent SDK
+- **Session management**: Pause/resume via session IDs
+- **Subagent coordination**: Hierarchical child walkers as subagents
+- **Progress tracking**: Real-time progress with provenance
+
+### A2A Integration (DEPRECATED - `sixspec/a2a/`)
+> **⚠️ DEPRECATED:** Use ClaudeWalker instead. See [MIGRATION_A2A_TO_CLAUDE_SDK.md](MIGRATION_A2A_TO_CLAUDE_SDK.md)
 
 ## Code Patterns
 
@@ -191,7 +197,8 @@ sixspec/
 │   └── examples/          # Example implementations
 ├── walkers/
 │   ├── dilts_walker.py    # Hierarchical delegation
-│   ├── a2a_walker.py      # A2A protocol integration
+│   ├── claude_walker.py   # Claude SDK integration
+│   ├── a2a_walker.py      # A2A protocol integration (DEPRECATED)
 │   ├── workspace.py       # Isolated execution environment
 │   └── strategies/        # Level-specific walkers
 ├── git/
@@ -199,16 +206,18 @@ sixspec/
 │   ├── history.py         # Queryable history
 │   └── hooks/
 │       └── commit-msg     # Validation hook
-└── a2a/
-    ├── task.py            # Task lifecycle
-    └── status.py          # Status updates
+└── a2a/                   # DEPRECATED - use ClaudeWalker
+    ├── task.py            # Task lifecycle (DEPRECATED)
+    └── status.py          # Status updates (DEPRECATED)
 
 tests/
 ├── core/                  # Core model tests
 ├── agents/                # Agent tests
 ├── walkers/               # Walker tests
+│   ├── test_claude_walker.py  # ClaudeWalker tests
+│   └── test_a2a_walker.py     # DEPRECATED
 ├── git/                   # Git integration tests
-└── a2a/                   # A2A protocol tests
+└── a2a/                   # DEPRECATED
 ```
 
 ## Important Constraints
@@ -287,13 +296,14 @@ From DESIGN_PHILOSOPHY.md:
 - **Lazy Evaluation**: Don't demand what you don't need
 - **Confidence Tracking**: Per-dimension confidence, not per-spec
 - **Hierarchical Autonomy**: Freedom decreases from Mission to Environment
-- **Graceful Interruption**: A2A enables pause/resume without context loss
+- **Graceful Interruption**: Claude SDK enables pause/resume via session management
 - **Self-Documentation**: Git history as queryable documentation
 
 ## Dependencies
 
 - Python 3.9+
 - pytest 7.0+ (dev dependency)
-- No runtime dependencies (pure Python)
+- networkx 3.0+ (hypergraph support)
+- claude-agent-sdk 0.1.0+ (optional, for ClaudeWalker)
 
-Future optional dependencies for A2A integration will include `agent2agent` and `grpcio` when Google's A2A library becomes available.
+The core SixSpec framework has minimal dependencies. ClaudeWalker requires the `claude-agent-sdk` package for session management and SDK integration.

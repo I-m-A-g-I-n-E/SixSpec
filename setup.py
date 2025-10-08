@@ -9,18 +9,21 @@ setup(
     author="SixSpec Contributors",
     packages=find_packages(),
     python_requires=">=3.9",
-    install_requires=[],
+    install_requires=[
+        'networkx>=3.0',
+    ],
     extras_require={
         'dev': [
             'pytest>=7.0.0',
         ],
-        # A2A integration for production-ready task lifecycle
-        # Note: Google's A2A protocol implementation is evolving.
-        # Current implementation uses built-in A2A-compatible task management.
-        # Future: Add 'agent2agent' and 'grpcio' when officially available.
+        # Claude Agent SDK integration for session management and pause/resume
+        'claude': [
+            'claude-agent-sdk>=0.1.0',
+        ],
+        # DEPRECATED: A2A integration (use 'claude' extra instead)
         'a2a': [
-            # 'agent2agent>=0.1.0',  # Future: Google's A2A library
-            # 'grpcio>=1.50.0',      # For gRPC streaming
+            # DEPRECATED: Use ClaudeWalker with 'claude' extra instead
+            # See MIGRATION_A2A_TO_CLAUDE_SDK.md for migration guide
         ]
     },
     package_data={

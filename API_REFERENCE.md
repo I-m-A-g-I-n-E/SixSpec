@@ -16,7 +16,8 @@ Complete API documentation for the SixSpec framework.
   - [GraphAgent](#graphagent)
 - [Walkers Module](#walkers-module)
   - [DiltsWalker](#diltswalker)
-  - [A2AWalker](#a2awalker)
+  - [ClaudeWalker](#claudewalker)
+  - [A2AWalker (DEPRECATED)](#a2awalker-deprecated)
   - [Workspace](#workspace)
   - [ValidationResult](#validationresult)
   - [MissionWalker](#missionwalker)
@@ -24,7 +25,7 @@ Complete API documentation for the SixSpec framework.
 - [Git Module](#git-module)
   - [CommitMessageParser](#commitmessageparser)
   - [DimensionalGitHistory](#dimensionalgithistory)
-- [A2A Module](#a2a-module)
+- [A2A Module (DEPRECATED)](#a2a-module-deprecated)
   - [Task](#task)
   - [TaskStatus](#taskstatus)
   - [StatusUpdate](#statusupdate)
@@ -858,71 +859,134 @@ class CustomWalker(DiltsWalker):
 
 ---
 
-### A2AWalker
+### ClaudeWalker
 
 ```python
-from sixspec.walkers import A2AWalker
+from sixspec.walkers import ClaudeWalker
 ```
 
-DiltsWalker enhanced with Google A2A protocol for graceful interruption.
+DiltsWalker enhanced with Claude Agent SDK for graceful interruption and session management.
 
 Extends [DiltsWalker](#diltswalker).
 
 #### Constructor
 
 ```python
-A2AWalker(level: DiltsLevel, parent: Optional['DiltsWalker'] = None)
+ClaudeWalker(level: DiltsLevel, parent: Optional['ClaudeWalker'] = None)
 ```
 
 **Parameters:**
 - `level`: Dilts level this walker operates at
 - `parent`: Optional parent walker
 
+**Raises:**
+- `ImportError`: If claude-agent-sdk is not installed
+
 #### Additional Attributes
 
-- `task` (Task): A2A task instance for lifecycle management
+- `session_id` (Optional[str]): Claude SDK session ID for resumption
+- `is_paused` (bool): Whether walker is currently paused
+- `client` (Optional[ClaudeSDKClient]): SDK client instance
+- `paused_spec` (Optional[Chunk]): Spec saved during pause
+- `execution_result` (Optional[Any]): Result saved for completion
 
 #### Methods
 
 Inherits all methods from [DiltsWalker](#diltswalker), plus:
 
-##### Access to Task Lifecycle
+##### `async execute(spec: Chunk) -> Any`
 
-```python
-# Start task
-walker.task.start()
+Execute with Claude Agent SDK session management.
 
-# Pause gracefully
-walker.task.pause()
+**Parameters:**
+- `spec`: Chunk specification to execute
 
-# Resume from pause
-walker.task.resume()
+**Returns:**
+- Execution result
 
-# Complete successfully
-walker.task.complete(result)
-
-# Fail with error
-walker.task.fail(error_message)
-```
+**Raises:**
+- `RuntimeError`: If SDK client fails to connect
 
 **Example:**
 ```python
-walker = A2AWalker(level=DiltsLevel.CAPABILITY)
+import asyncio
 
-# Subscribe to status updates
-def handle_status(update):
-    print(f"Status: {update.status}")
+async def main():
+    walker = ClaudeWalker(level=DiltsLevel.CAPABILITY)
+    spec = Chunk("System", "needs", "feature", dimensions={
+        Dimension.WHAT: "Integrate payment"
+    })
+    result = await walker.execute(spec)
+    print(f"Session: {walker.session_id}")
 
-walker.task.on_status_change(handle_status)
-
-# Execute with pause capability
-walker.task.start()
-result = walker.execute(spec)
-
-# Can pause and resume gracefully
-walker.task.pause()  # Preserves all context
-walker.task.resume()  # Continues exactly where it left off
+asyncio.run(main())
 ```
+
+##### `async pause() -> str`
+
+Gracefully pause walker and all children.
+
+**Returns:**
+- Session ID for resuming
+
+**Example:**
+```python
+session_id = await walker.pause()
+print(f"Paused at: {session_id}")
+```
+
+##### `async resume(session_id: str, spec: Chunk) -> Any`
+
+Resume execution from paused state.
+
+**Parameters:**
+- `session_id`: Session ID from previous execution
+- `spec`: Original spec for context restoration
+
+**Returns:**
+- Result from continued execution
+
+**Example:**
+```python
+result = await walker.resume(session_id, spec)
+```
+
+##### `get_progress() -> Dict[str, Any]`
+
+Get current execution state (synchronous).
+
+**Returns:**
+- Dictionary with execution state, session info, and progress
+
+**Example:**
+```python
+progress = walker.get_progress()
+print(f"Level: {progress['level']}")
+print(f"Session: {progress['session_id']}")
+print(f"Paused: {progress['is_paused']}")
+```
+
+##### `update_what(new_what: str) -> None`
+
+Update WHAT dimension while preserving WHY.
+
+**Parameters:**
+- `new_what`: New WHAT dimension value
+
+**Example:**
+```python
+walker.update_what("Use PayPal")  # Changes approach, keeps purpose
+```
+
+### A2AWalker (DEPRECATED)
+
+> **⚠️ DEPRECATED:** Use [ClaudeWalker](#claudewalker) instead. A2AWalker uses a custom A2A implementation that is no longer maintained. ClaudeWalker provides the same functionality using the official Claude Agent SDK.
+
+```python
+from sixspec.walkers import A2AWalker  # DEPRECATED
+```
+
+See [ClaudeWalker](#claudewalker) for the recommended replacement.
 
 ---
 
@@ -1291,13 +1355,48 @@ history.reload()  # Re-parse git log
 
 ---
 
-## A2A Module
+## A2A Module (DEPRECATED)
 
-### Task
+> **⚠️ DEPRECATED:** The A2A module is deprecated and will be removed in v0.3.0. Use [ClaudeWalker](#claudewalker) with the Claude Agent SDK instead for session management and pause/resume functionality.
+
+### Migration Guide
+
+**Before (A2A):**
+```python
+from sixspec.walkers import A2AWalker
+from sixspec.a2a import TaskStatus
+
+walker = A2AWalker(level=DiltsLevel.CAPABILITY)
+walker.task.start()
+walker.task.pause()
+walker.task.resume()
+```
+
+**After (ClaudeWalker):**
+```python
+from sixspec.walkers import ClaudeWalker
+import asyncio
+
+async def main():
+    walker = ClaudeWalker(level=DiltsLevel.CAPABILITY)
+    result = await walker.execute(spec)
+    session_id = await walker.pause()
+    result = await walker.resume(session_id, spec)
+
+asyncio.run(main())
+```
+
+See [MIGRATION_A2A_TO_CLAUDE_SDK.md](MIGRATION_A2A_TO_CLAUDE_SDK.md) for complete migration guide.
+
+---
+
+### Task (DEPRECATED)
 
 ```python
-from sixspec.a2a import Task
+from sixspec.a2a import Task  # DEPRECATED
 ```
+
+> **⚠️ DEPRECATED:** Use ClaudeWalker session management instead.
 
 A2A-compatible task with lifecycle management.
 
@@ -1425,11 +1524,13 @@ Serialize task to dictionary.
 
 ---
 
-### TaskStatus
+### TaskStatus (DEPRECATED)
 
 ```python
-from sixspec.a2a import TaskStatus
+from sixspec.a2a import TaskStatus  # DEPRECATED
 ```
+
+> **⚠️ DEPRECATED:** Use ClaudeWalker's `is_paused` flag instead.
 
 Enumeration of task states.
 
@@ -1468,11 +1569,13 @@ Check if this is a terminal state.
 
 ---
 
-### StatusUpdate
+### StatusUpdate (DEPRECATED)
 
 ```python
-from sixspec.a2a import StatusUpdate
+from sixspec.a2a import StatusUpdate  # DEPRECATED
 ```
+
+> **⚠️ DEPRECATED:** Use ClaudeWalker's `get_progress()` method instead.
 
 Real-time status update for task lifecycle.
 

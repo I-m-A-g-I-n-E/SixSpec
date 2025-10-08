@@ -6,7 +6,8 @@ enabling hierarchical delegation through Dilts' Logical Levels.
 
 Core Classes:
     - DiltsWalker: Base walker with WHAT->WHY propagation
-    - A2AWalker: DiltsWalker enhanced with A2A task lifecycle
+    - ClaudeWalker: DiltsWalker enhanced with Claude Agent SDK integration
+    - A2AWalker: DiltsWalker enhanced with A2A task lifecycle (DEPRECATED - use ClaudeWalker)
     - Workspace: Isolated execution environment
     - ValidationResult: Result validation for portfolio execution
 
@@ -29,13 +30,15 @@ Example:
 
 from sixspec.walkers.dilts_walker import DiltsWalker, ValidationResult
 from sixspec.walkers.workspace import Workspace
-from sixspec.walkers.a2a_walker import A2AWalker
+from sixspec.walkers.claude_walker import ClaudeWalker
+from sixspec.walkers.a2a_walker import A2AWalker  # DEPRECATED
 from sixspec.walkers.strategies.mission_strategy import MissionWalker
 from sixspec.walkers.strategies.capability_strategy import CapabilityWalker
 
 __all__ = [
     "DiltsWalker",
-    "A2AWalker",
+    "ClaudeWalker",
+    "A2AWalker",  # DEPRECATED - use ClaudeWalker
     "ValidationResult",
     "Workspace",
     "MissionWalker",

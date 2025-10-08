@@ -25,7 +25,7 @@ This simple rule creates:
 ┌─────────────────────────────────────────┐
 │         Walker Layer                     │
 │  - DiltsWalker (hierarchical execution) │
-│  - A2AWalker (task lifecycle)           │
+│  - ClaudeWalker (SDK integration)       │
 │  - Strategy implementations             │
 └─────────────────────────────────────────┘
                    ↓
@@ -46,7 +46,7 @@ This simple rule creates:
 ┌─────────────────────────────────────────┐
 │         Integration Layer                │
 │  - Git (commits, history, hooks)        │
-│  - A2A (task lifecycle protocol)        │
+│  - Claude Agent SDK (session mgmt)      │
 └─────────────────────────────────────────┘
 ```
 
@@ -259,32 +259,35 @@ spec = W5H1(
 result = walker.execute_portfolio(spec, n_strategies=3)
 ```
 
-#### A2AWalker
+#### ClaudeWalker
 
-DiltsWalker enhanced with Google A2A protocol for graceful interruption:
+DiltsWalker enhanced with Claude Agent SDK for session management:
 
 ```python
-class A2AWalker(DiltsWalker):
-    def __init__(self, level: DiltsLevel, parent: Optional['DiltsWalker'] = None):
+class ClaudeWalker(DiltsWalker):
+    def __init__(self, level: DiltsLevel, parent: Optional['ClaudeWalker'] = None):
         super().__init__(level, parent)
-        self.task = Task(task_id=self.name, parent=parent.task if parent else None)
+        self.session_id: Optional[str] = None
+        self.is_paused: bool = False
+        self.client: Optional[ClaudeSDKClient] = None
 ```
 
-**A2A Lifecycle:**
+**Session Lifecycle:**
 
 ```
-PENDING → start() → RUNNING → pause() → PAUSED
-                        ↓                    ↓
-                   complete()           resume()
-                        ↓                    ↓
-                   COMPLETED            RUNNING
+Not Started → execute() → Running → pause() → Paused
+                            ↓                     ↓
+                        Complete            resume(session_id)
+                            ↓                     ↓
+                        Completed              Running
 ```
 
 **Key Features:**
-- Graceful pause with full context preservation
-- Parent-child coordination via status callbacks
-- Resume from pause without losing WHAT→WHY chain
-- Cascade operations (pause cascades to children)
+- Graceful pause with SDK interrupt
+- Session-based resumption with session IDs
+- Subagent coordination for hierarchical execution
+- Full WHAT→WHY chain preservation
+- Progress tracking and provenance
 
 #### Strategy Implementations
 
@@ -401,71 +404,63 @@ Validates commits before acceptance:
 # - Ignores comment lines
 ```
 
-### 6. A2A Integration (`sixspec/a2a/`)
+### 6. Claude Agent SDK Integration
 
-Implementation of Google's Agent-to-Agent (A2A) protocol for graceful task lifecycle management.
+Integration with Claude Agent SDK for session management and hierarchical execution.
 
-#### Task
+> **Note:** The custom A2A implementation has been replaced with ClaudeWalker using the official Claude Agent SDK. See [MIGRATION_A2A_TO_CLAUDE_SDK.md](MIGRATION_A2A_TO_CLAUDE_SDK.md) for migration details.
 
-A2A-compatible task with lifecycle:
+#### Session Management
+
+ClaudeWalker uses Claude SDK's session management:
 
 ```python
-class Task:
-    def __init__(self, task_id: Optional[str] = None, parent: Optional['Task'] = None):
-        self.status = TaskStatus.PENDING
-        self.result: Optional[Any] = None
-        self.error: Optional[str] = None
-        self.parent = parent
-        self.children: List['Task'] = []
+class ClaudeWalker(DiltsWalker):
+    async def execute(self, spec: Chunk) -> Any:
+        """Execute with SDK session management."""
+        options = ClaudeAgentOptions(
+            agents=self._build_subagent_config(),
+            allowed_tools=["Read", "Write", "Edit", "Bash", "Grep", "Glob"],
+            system_prompt=self._build_system_prompt(spec)
+        )
 
-    def start() -> None:
-        """PENDING → RUNNING"""
+        async with ClaudeSDKClient(options=options) as client:
+            await client.query(self._build_prompt(spec))
+            result = await self._process_responses(client)
+            return result
 
-    def pause() -> None:
-        """RUNNING → PAUSED (cascades to children)"""
+    async def pause(self) -> str:
+        """Gracefully pause using SDK interrupt."""
+        await self.client.interrupt()
+        self.is_paused = True
+        return self.session_id
 
-    def resume() -> None:
-        """PAUSED → RUNNING (bottom-up: children first)"""
-
-    def complete(result: Any) -> None:
-        """→ COMPLETED (terminal)"""
-
-    def fail(error: str) -> None:
-        """→ FAILED (terminal)"""
+    async def resume(self, session_id: str, spec: Chunk) -> Any:
+        """Resume using SDK's session ID."""
+        options = ClaudeAgentOptions(
+            resume=session_id,
+            # ... other options
+        )
+        async with ClaudeSDKClient(options=options) as client:
+            result = await self._process_responses(client)
+            return result
 ```
 
-#### TaskStatus
+#### Progress Tracking
 
 ```python
-class TaskStatus(Enum):
-    PENDING = "pending"
-    RUNNING = "running"
-    PAUSED = "paused"
-    COMPLETED = "completed"
-    FAILED = "failed"
-
-    def can_pause(self) -> bool:
-        return self == TaskStatus.RUNNING
-
-    def can_resume(self) -> bool:
-        return self == TaskStatus.PAUSED
-
-    def is_terminal(self) -> bool:
-        return self in {TaskStatus.COMPLETED, TaskStatus.FAILED}
-```
-
-#### StatusUpdate
-
-Real-time status streaming:
-
-```python
-@dataclass
-class StatusUpdate:
-    task_id: str
-    status: TaskStatus
-    result: Optional[Any]
-    error: Optional[str]
-    metadata: dict
+progress = walker.get_progress()
+# Returns:
+# {
+#     "walker_id": "Walker-L3-...",
+#     "level": 3,
+#     "session_id": "session-xyz",
+#     "is_paused": False,
+#     "what": "Current action",
+#     "why": "Purpose",
+#     "provenance": ["Mission WHAT", "Identity WHAT", ...],
+#     "children": [...]
+# }
 ```
 
 ## Data Flow Patterns
@@ -540,28 +535,28 @@ chain = walker.trace_provenance()
 # → Full chain shows complete reasoning
 ```
 
-### 4. A2A Pause/Resume
+### 4. Claude SDK Pause/Resume
 
 ```
 Walker hierarchy executing:
-    L6 → L5 → L4 → L3 (RUNNING)
+    L6 → L5 → L4 → L3 (Running, session_id=xyz)
          ↓
     User interrupts
          ↓
-    L3.pause() → cascades to all children
+    await L3.pause() → SDK interrupt, cascades to children
          ↓
-    L6 → L5 → L4 → L3 (PAUSED)
+    L6 → L5 → L4 → L3 (Paused, session_id=xyz preserved)
          ↓
     All context preserved:
     - WHAT→WHY chain
     - Workspace data
-    - Task state
+    - Session ID for resume
          ↓
-    Later: L3.resume()
+    Later: await L3.resume(session_id=xyz, spec)
          ↓
-    Bottom-up resume: children first
+    SDK resumes from session
          ↓
-    L6 → L5 → L4 → L3 (RUNNING)
+    L6 → L5 → L4 → L3 (Running)
     Continues from exact state
 ```
 
@@ -666,26 +661,32 @@ history = DimensionalGitHistory(Path("."))
 results = history.query(where="payment", commit_type="fix")
 ```
 
-### 2. A2A Integration
+### 2. Claude SDK Integration
 
 ```python
-# Create A2A-enabled walker
-walker = A2AWalker(level=DiltsLevel.CAPABILITY)
+import asyncio
+from sixspec.walkers import ClaudeWalker
 
-# Subscribe to status updates
-def handle_status(update: StatusUpdate):
-    print(f"Status: {update.status}")
+async def main():
+    # Create Claude SDK-enabled walker
+    walker = ClaudeWalker(level=DiltsLevel.CAPABILITY)
 
-walker.task.on_status_change(handle_status)
+    # Execute with pause capability
+    result = await walker.execute(spec)
+    print(f"Session ID: {walker.session_id}")
 
-# Execute with pause capability
-walker.task.start()
-result = walker.execute(spec)
+    # Check progress
+    progress = walker.get_progress()
+    print(f"Level: {progress['level']}, WHAT: {progress['what']}")
 
-# Graceful interruption
-walker.task.pause()  # Preserves all context
-# ... later ...
-walker.task.resume()  # Continues exactly where it left off
+    # Graceful interruption
+    session_id = await walker.pause()  # Preserves all context
+    print(f"Paused: {walker.is_paused}")
+
+    # ... later ...
+    result = await walker.resume(session_id, spec)  # Continues from session
+
+asyncio.run(main())
 ```
 
 ### 3. Custom Agents
@@ -796,10 +797,11 @@ tests/
 │   └── test_examples.py        # Example agent tests
 ├── walkers/
 │   ├── test_dilts_walker.py    # DiltsWalker tests
-│   ├── test_a2a_walker.py      # A2AWalker tests
+│   ├── test_claude_walker.py   # ClaudeWalker tests
+│   ├── test_a2a_walker.py      # A2AWalker tests (DEPRECATED)
 │   └── test_workspace.py       # Workspace tests
-├── a2a/
-│   └── test_task.py            # Task lifecycle tests
+├── a2a/                         # DEPRECATED
+│   └── test_task.py            # Task lifecycle tests (DEPRECATED)
 └── git/
     ├── test_parser.py          # Commit parsing
     ├── test_history.py         # History queries
@@ -810,9 +812,9 @@ tests/
 
 - **Core models**: 100% (all dimensional operations)
 - **Agents**: 95% (NodeAgent, GraphAgent, examples)
-- **Walkers**: 90% (DiltsWalker, A2AWalker, strategies)
+- **Walkers**: 90% (DiltsWalker, ClaudeWalker, strategies)
 - **Git integration**: 95% (parser, history, hooks)
-- **A2A integration**: 100% (task lifecycle)
+- **Claude SDK integration**: 100% (session management, pause/resume)
 
 ## Future Architecture
 
