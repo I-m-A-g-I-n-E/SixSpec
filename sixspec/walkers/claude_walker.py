@@ -234,7 +234,9 @@ class ClaudeWalker(DiltsWalker):
         """
         if self.client and not self.is_paused:
             await self.client.interrupt()
-            self.is_paused = True
+
+        # Mark as paused even if no client (for state tracking)
+        self.is_paused = True
 
         # Cascade pause to children
         for child in self.children:
